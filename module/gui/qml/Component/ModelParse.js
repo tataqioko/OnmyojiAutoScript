@@ -1,5 +1,16 @@
 .pragma library
 
+// 性能优化：添加缓存机制
+var _parseCache = {}
+var _maxCacheSize = 100
+
+function clearCache() {
+    _parseCache = {}
+}
+
+function getCacheKey(definitions, group) {
+    return JSON.stringify({def: Object.keys(definitions).sort(), group: group})
+}
 
 //
 //*****************************请注意下面的函数只适用与pydantic生成的task的参数
@@ -59,10 +70,27 @@ function parseRef(ref){
  * @returns {Array} -
  */
 function parseArgument(definitions, group){
-    if(!(group in definitions)){
-        return null
+    if(!definitions){
+        console.error("parseArgument: definitions is null or undefined");
+        return null;
     }
+    if(!(group in definitions)){
+        console.error("parseArgument: group '" + group + "' not found in definitions");
+        return null;
+    }
+    
+    // 性能优化：检查缓存
+    const cacheKey = getCacheKey(definitions, group);
+    if(_parseCache[cacheKey]) {
+        console.log("Using cached result for group:", group);
+        return _parseCache[cacheKey];
+    }
+    
     const result = []
+    if(!definitions[group] || !definitions[group]["properties"]){
+        console.error("parseArgument: properties not found for group '" + group + "'");
+        return null;
+    }
     const pro = definitions[group]["properties"]
     for(const key in pro){
         const arg = {}
@@ -82,6 +110,42 @@ function parseArgument(definitions, group){
             arg["title"] = parseRef(ref)
             arg["type"] = "enum"
         }
+        
+        // 处理直接的 $ref 引用
+        if("$ref" in argName){
+            const refName = parseRef(argName["$ref"])
+            if(refName && refName in definitions){
+                const refDef = definitions[refName]
+                if("enum" in refDef){
+                    arg["type"] = "enum"
+                    arg["options"] = refDef["enum"]
+                    if(!arg["title"]){
+                        arg["title"] = refName
+                    }
+                }
+            }
+        }
+        
+        // 处理 anyOf 结构
+        if("anyOf" in argName){
+            for(let i = 0; i < argName.anyOf.length; i++){
+                const anyOfItem = argName.anyOf[i]
+                if("$ref" in anyOfItem){
+                    const refName = parseRef(anyOfItem["$ref"])
+                    if(refName && refName in definitions){
+                        const refDef = definitions[refName]
+                        if("enum" in refDef){
+                            arg["type"] = "enum"
+                            arg["options"] = refDef["enum"]
+                            if(!arg["title"]){
+                                arg["title"] = refName
+                            }
+                            break; // 找到第一个有效的枚举就停止
+                        }
+                    }
+                }
+            }
+        }
 
         if("description" in argName){
             arg["description"] = argName.description
@@ -97,15 +161,36 @@ function parseArgument(definitions, group){
 
         if("type" in argName){
             arg["type"] = argName.type
+            // 将特殊类型转换为字符串类型
+            if(arg["type"] === "date_time" || arg["type"] === "time_delta" || arg["type"] === "time"){
+                arg["type"] = "string"
+            }
         }
 
         if(arg["type"] === "enum"){
-            arg["options"] = definitions[arg.title]["enum"]
+            // 如果已经在前面设置了 options，就不需要再设置了
+            if(!arg["options"]){
+                if(arg.title && definitions[arg.title] && definitions[arg.title]["enum"]){
+                    arg["options"] = definitions[arg.title]["enum"]
+                } else {
+                    console.error("Cannot find enum options for", arg.title)
+                    arg["type"] = "string" // 降级为字符串类型
+                }
+            }
         }
 
         result.push(arg)
 
     }
+    
+    // 性能优化：缓存结果
+    if(Object.keys(_parseCache).length >= _maxCacheSize) {
+        // 清理最旧的缓存项
+        const oldestKey = Object.keys(_parseCache)[0];
+        delete _parseCache[oldestKey];
+    }
+    _parseCache[cacheKey] = result;
+    
     return result
 }
 

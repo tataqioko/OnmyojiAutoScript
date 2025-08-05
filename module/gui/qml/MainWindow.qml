@@ -68,9 +68,9 @@ FluWindow {
 //            process_manager.create_all()
         }
     }
-//    Notity{
-//        id: notity
-//    }
+    Notity{
+        id: notity
+    }
 
     FluNavigationView{
         id:nav_view
@@ -87,7 +87,8 @@ FluWindow {
             nav_view.setCurrentIndex(0)
             items.addFluPaneItems()
 
-            notity.open()
+            // 注释掉启动通知弹窗
+            // notity.open()
         }
     }
     Component.onCompleted:{

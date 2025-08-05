@@ -229,7 +229,10 @@ class Script:
         data["waiting"] = waiting
 
         if self.gui_update_task is not None:
+            logger.info(f'Sending GUI update: task={data.get("task", {})}, pending={len(data.get("pending", []))}, waiting={len(data.get("waiting", []))}')
             self.gui_update_task(data)
+        else:
+            logger.warning('GUI update callback is None, data not sent to GUI')
 
     def _gui_set_status(self, status: str) -> None:
         """
@@ -301,6 +304,9 @@ class Script:
             self.config.task = task
             if self.state_queue:
                 self.state_queue.put({"schedule": self.config.get_schedule_data()})
+            
+            # 更新GUI任务显示
+            self._gui_update_tasks()
 
             # from module.base.resource import release_resources
             # if self.config.task.command != 'Alas':
@@ -462,10 +468,14 @@ class Script:
 
             if success:
                 del_cached_property(self, 'config')
+                # 任务完成后更新GUI显示
+                self._gui_update_tasks()
                 continue
             elif self.config.script.error.handle_error:
                 # self.config.task_delay(success=False)
                 del_cached_property(self, 'config')
+                # 任务失败后也更新GUI显示
+                self._gui_update_tasks()
                 # self.checker.check_now()
                 continue
             else:

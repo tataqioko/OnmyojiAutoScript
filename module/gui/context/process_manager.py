@@ -438,7 +438,7 @@ class ProcessManager(QObject):
 
                 logger.info(f'Update thread get')
                 for key, value in update.items():
-                    if "task" and "pending" and "waiting" in value:
+                    if "task" in value and "pending" in value and "waiting" in value:
                         self.sig_update_task.emit(key, json.dumps(value["task"]))
                         self.sig_update_pending.emit(key, json.dumps(value["pending"]))
                         self.sig_update_waiting.emit(key, json.dumps(value["waiting"]))

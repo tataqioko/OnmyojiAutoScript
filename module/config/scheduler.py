@@ -72,7 +72,7 @@ class TaskScheduler:
         :return:
         """
         # 1. 按照优先级进行分组
-        sorted(pending, key=operator.attrgetter("priority"))
+        pending = sorted(pending, key=operator.attrgetter("priority"))
         groups = {}
         for task in pending:
             if groups.get(task.priority) is None:

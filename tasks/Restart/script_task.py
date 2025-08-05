@@ -60,6 +60,13 @@ class ScriptTask(LoginHandler):
         周三更新游戏的时候延迟
         @return:
         """
+        # 检查是否有立即执行标记
+        if hasattr(self.config, '_immediate_tasks') and self.config._immediate_tasks is not None and 'restart' in self.config._immediate_tasks:
+            logger.info("Restart task marked for immediate execution, skipping delay")
+            # 清除立即执行标记
+            self.config._immediate_tasks.discard('restart')
+            return False
+            
         datetime_now = datetime.now()
         if not (datetime_now.weekday() == 2 and 6 <= datetime_now.hour <= 8):
             return False

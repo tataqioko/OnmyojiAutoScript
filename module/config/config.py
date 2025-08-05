@@ -255,11 +255,12 @@ class Config(ConfigState, ConfigManual, ConfigWatcher, ConfigMenu):
         data = {"running": running, "pending": pending, "waiting": waiting}
         return data
 
-    def task_call(self, task: str = None, force_call=True):
+    def task_call(self, task: str = None, force_call=True, immediate=False):
         """
         回调任务，这会是在任务结束后调用
         :param task: 调用的任务的大写名称
         :param force_call:
+        :param immediate: 是否立即执行，忽略任务调度延迟
         :return:
         """
         task = convert_to_underscore(task)
@@ -268,11 +269,18 @@ class Config(ConfigState, ConfigManual, ConfigWatcher, ConfigMenu):
 
         task_enable = self.model.deep_get(self.model, keys=f'{task}.scheduler.enable')
         if force_call or task_enable:
-            logger.info(f"Task call: {task}")
+            logger.info(f"Task call: {task}" + (" (immediate)" if immediate else ""))
             next_run = datetime.now().replace(
                 microsecond=0
             )
             self.model.deep_set(self.model, keys=f'{task}.scheduler.next_run', value=next_run)
+            # 如果是立即执行，设置一个运行时标记
+            if immediate:
+                # 设置运行时标记，不保存到配置文件
+                if not hasattr(self, '_immediate_tasks') or self._immediate_tasks is None:
+                    self._immediate_tasks = set()
+                self._immediate_tasks.add(task)
+                logger.info(f"Task {task} marked for immediate execution")
             self.save()
             return True
         else:

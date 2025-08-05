@@ -52,13 +52,25 @@ class Device(Platform, Screenshot, Control, AppControl):
 
         # Auto-fill emulator info
         if IS_WINDOWS and self.config.script.device.emulatorinfo_type == 'auto':
-            _ = self.emulator_instance
+            try:
+                _ = self.emulator_instance
+            except Exception as e:
+                logger.warning(f'Failed to get emulator instance: {e}')
+                logger.info('Emulator instance detection skipped')
 
-        self.screenshot_interval_set()
+        try:
+            self.screenshot_interval_set()
+        except Exception as e:
+            logger.warning(f'Failed to set screenshot interval: {e}')
 
         # Auto-select the fastest screenshot method
         if self.config.script.device.screenshot_method == 'auto':
-            self.run_simple_screenshot_benchmark()
+            try:
+                self.run_simple_screenshot_benchmark()
+            except Exception as e:
+                logger.warning(f'Screenshot benchmark failed: {e}')
+                logger.info('Using default screenshot method: ADB')
+                self.config.script.device.screenshot_method = 'ADB'
 
     def run_simple_screenshot_benchmark(self):
         """

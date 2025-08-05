@@ -29,13 +29,195 @@ def handle_title2num(title: str) -> int:
     return FindWindow(None, title)
 
 
+def find_window_by_parent_title(parent_title: str, child_name = None) -> int:
+    """
+    通过父窗口标题查找子窗口句柄，用于解决模拟器重启后句柄变化的问题
+    :param parent_title: 父窗口标题（模糊匹配）
+    :param child_name: 子窗口名称（可选，用于精确匹配特定子窗口）
+    :return: 找到的窗口句柄，未找到返回0
+    """
+    def enum_windows_callback(hwnd, result_list):
+        window_text = GetWindowText(hwnd)
+        if parent_title in window_text:
+            result_list.append(hwnd)
+    
+    parent_windows = []
+    EnumWindows(enum_windows_callback, parent_windows)
+    
+    if not parent_windows:
+        logger.warning(f'No parent window found with title containing: {parent_title}')
+        return 0
+    
+    # 如果找到多个父窗口，选择第一个
+    parent_hwnd = parent_windows[0]
+    if len(parent_windows) > 1:
+        logger.warning(f'Multiple parent windows found, using first one: {GetWindowText(parent_hwnd)}')
+    
+    # 如果没有指定子窗口名称，直接返回父窗口句柄
+    if child_name is None:
+        logger.info(f'Found parent window: {GetWindowText(parent_hwnd)} (handle: {parent_hwnd})')
+        return parent_hwnd
+    
+    # 查找指定名称的子窗口
+    def enum_child_callback(child_hwnd, result_list):
+        child_text = GetWindowText(child_hwnd)
+        if child_text == child_name:
+            result_list.append(child_hwnd)
+    
+    child_windows = []
+    EnumChildWindows(parent_hwnd, enum_child_callback, child_windows)
+    
+    if child_windows:
+        child_hwnd = child_windows[0]
+        logger.info(f'Found child window: {child_name} (handle: {child_hwnd}) under parent: {GetWindowText(parent_hwnd)}')
+        return child_hwnd
+    else:
+        logger.warning(f'Child window "{child_name}" not found under parent: {GetWindowText(parent_hwnd)}')
+        return parent_hwnd  # 返回父窗口作为备选
+
+
+def find_mumu_window_by_display_title(display_title: str) -> int:
+    """
+    专门针对MuMu模拟器的窗口查找，通过显示标题（如yys1）查找正确的截图句柄
+    MuMu模拟器的窗口层级结构：
+    Desktop -> yys1 -> MuMuNxDevice -> nemudisplay (目标窗口)
+    
+    :param display_title: 显示标题，如"yys1"
+    :return: nemudisplay窗口的句柄，未找到返回0
+    """
+    def enum_windows_callback(hwnd, result_list):
+        window_text = GetWindowText(hwnd)
+        if window_text == display_title:
+            result_list.append(hwnd)
+    
+    # 查找显示标题匹配的顶级窗口
+    display_windows = []
+    EnumWindows(enum_windows_callback, display_windows)
+    
+    if not display_windows:
+        logger.warning(f'No window found with display title: {display_title}')
+        return 0
+    
+    display_hwnd = display_windows[0]
+    if len(display_windows) > 1:
+        logger.warning(f'Multiple windows found with title "{display_title}", using first one')
+    
+    logger.info(f'Found display window: {display_title} (handle: {display_hwnd})')
+    
+    # 递归查找nemudisplay子窗口
+    def find_nemudisplay_recursive(parent_hwnd, level=0):
+        if level > 5:  # 防止无限递归
+            return 0
+            
+        child_windows = []
+        try:
+            EnumChildWindows(parent_hwnd, lambda hwnd, param: param.append(hwnd), child_windows)
+        except:
+            return 0
+        
+        for child_hwnd in child_windows:
+            if GetParent(child_hwnd) == parent_hwnd:
+                child_text = GetWindowText(child_hwnd)
+                logger.info(f'{"  " * level}Checking child: {child_text} (handle: {child_hwnd})')
+                
+                # 找到nemudisplay窗口
+                if child_text == 'nemudisplay':
+                    logger.info(f'Found target nemudisplay window: {child_hwnd}')
+                    return child_hwnd
+                
+                # 继续在子窗口中递归查找
+                result = find_nemudisplay_recursive(child_hwnd, level + 1)
+                if result != 0:
+                    return result
+        
+        return 0
+    
+    # 从显示窗口开始递归查找nemudisplay
+    nemudisplay_hwnd = find_nemudisplay_recursive(display_hwnd)
+    
+    if nemudisplay_hwnd != 0:
+        logger.info(f'Successfully found nemudisplay window: {nemudisplay_hwnd} for display title: {display_title}')
+        return nemudisplay_hwnd
+    else:
+        logger.warning(f'nemudisplay window not found under display title: {display_title}')
+        return display_hwnd  # 返回显示窗口作为备选
+
+
+def enhanced_handle_title2num(title: str) -> int:
+    """
+    增强的标题到句柄转换，支持父窗口标题识别和MuMu模拟器的特殊处理
+    :param title: 窗口标题
+    :return: 窗口句柄，未找到返回0
+    """
+    # 首先检查是否为MuMu模拟器的显示标题
+    # 特殊处理：如果标题看起来像MuMu模拟器的显示标题（不包含"模拟器"等关键词）
+    traditional_emulator_keywords = ['模拟器', 'Player', 'Emulator', 'MuMu', '雷电', '夜神', '蓝叠', '逍遥']
+    is_traditional_title = any(keyword in title for keyword in traditional_emulator_keywords)
+    
+    # 对于非传统标题，优先尝试MuMu显示标题检测
+    if not is_traditional_title:
+        logger.info(f'Trying MuMu display title detection for: {title}')
+        mumu_handle = find_mumu_window_by_display_title(title)
+        if mumu_handle != 0:
+            return mumu_handle
+    
+    # 然后尝试直接匹配
+    direct_handle = FindWindow(None, title)
+    if direct_handle != 0:
+        logger.info(f'Direct window match found: {title} (handle: {direct_handle})')
+        
+        # 如果是直接匹配但可能是MuMu显示窗口，尝试查找nemudisplay子窗口
+        if not is_traditional_title:
+            logger.info(f'Direct match found, but checking for nemudisplay child window...')
+            mumu_handle = find_mumu_window_by_display_title(title)
+            if mumu_handle != 0 and mumu_handle != direct_handle:
+                logger.info(f'Found better nemudisplay window: {mumu_handle} instead of {direct_handle}')
+                return mumu_handle
+        
+        return direct_handle
+    
+    # 如果直接匹配失败，尝试其他增强检测
+    logger.info(f'Direct match failed for "{title}", trying enhanced detection...')
+    
+    # 对于传统的模拟器标题，尝试通过父窗口标题查找
+    emulator_mappings = {
+        'MuMu模拟器12': ('MuMu', 'MuMuPlayer'),
+        'MuMu模拟器': ('MuMu', 'NemuPlayer'), 
+        '雷电模拟器': ('雷电', 'TheRender'),
+        '夜神模拟器': ('夜神', 'Nox'),
+        '蓝叠模拟器': ('蓝叠', 'HD-Player'),
+    }
+    
+    for exact_title, (parent_keyword, child_name) in emulator_mappings.items():
+        if exact_title in title or parent_keyword in title:
+            parent_handle = find_window_by_parent_title(parent_keyword, child_name)
+            if parent_handle != 0:
+                return parent_handle
+    
+    # 最后尝试模糊匹配父窗口
+    for keyword in ['模拟器', 'Player', 'Emulator']:
+        if keyword in title:
+            parent_handle = find_window_by_parent_title(keyword)
+            if parent_handle != 0:
+                return parent_handle
+    
+    logger.error(f'No window found for title: {title}')
+    return 0
+
+
 def handle_num2title(num: int) -> str:
     """
-    通过句柄号返回窗口的标题，如果传入句柄号不合法则返回None
+    通过句柄号返回窗口的标题，如果传入句柄号不合法则返回空字符串
     :param num:
     :return:
     """
-    return None if num is None or num == 0 or num == '' else GetWindowText(num)
+    if num is None or num == 0 or num == '':
+        return ''
+    try:
+        title = GetWindowText(num)
+        return title if title else ''
+    except:
+        return ''
 
 
 def is_handle_valid(num: int) -> bool:
@@ -44,7 +226,12 @@ def is_handle_valid(num: int) -> bool:
     :param num:
     :return:
     """
-    return IsWindow(num)
+    if num is None or num == 0:
+        return False
+    try:
+        return bool(IsWindow(num))
+    except:
+        return False
 
 
 def handle_num2pid(num: int) -> int:
@@ -183,7 +370,24 @@ class Handle:
             logger.info('Handle is auto. oas will find window emulator')
             window_list = Handle.all_windows()
             self.root_handle_title = self.auto_handle_title(window_list)
-            self.root_handle_num = handle_title2num(self.root_handle_title)
+            if self.root_handle_title:
+                # 首先尝试传统方法
+                traditional_handle = handle_title2num(self.root_handle_title)
+                if traditional_handle != 0:
+                    self.root_handle_num = traditional_handle
+                    logger.info(f'Auto detection using traditional method: {self.root_handle_title}')
+                else:
+                    # 使用增强的句柄检测方法
+                    logger.info('Auto detection: traditional method failed, trying enhanced detection...')
+                    enhanced_handle = enhanced_handle_title2num(self.root_handle_title)
+                    if enhanced_handle != 0:
+                        self.root_handle_num = enhanced_handle
+                        self.root_handle_title = handle_num2title(enhanced_handle)
+                        logger.info(f'Auto detection using enhanced method: {self.root_handle_title} (handle: {enhanced_handle})')
+                    else:
+                        logger.error(f'Auto detection failed for title: {self.root_handle_title}')
+            else:
+                logger.error('Auto detection failed: no emulator window found')
         if isinstance(self.root_handle, str):
             try:
                 self.root_handle_num = int(self.root_handle)
@@ -193,9 +397,22 @@ class Handle:
                     self.root_handle_title = handle_num2title(self.root_handle_num)
             except ValueError:
                 logger.info('Handle is handle string. oas use it as root handle title')
-                if handle_title2num(self.root_handle) != 0:
-                    self.root_handle_num = handle_title2num(self.root_handle)
+                # 首先尝试传统方法
+                traditional_handle = handle_title2num(self.root_handle)
+                if traditional_handle != 0:
+                    self.root_handle_num = traditional_handle
                     self.root_handle_title = self.root_handle
+                    logger.info(f'Found window using traditional method: {self.root_handle}')
+                else:
+                    # 使用增强的句柄检测方法
+                    logger.info('Traditional method failed, trying enhanced detection...')
+                    enhanced_handle = enhanced_handle_title2num(self.root_handle)
+                    if enhanced_handle != 0:
+                        self.root_handle_num = enhanced_handle
+                        self.root_handle_title = handle_num2title(enhanced_handle)
+                        logger.info(f'Found window using enhanced method: {self.root_handle_title} (handle: {enhanced_handle})')
+                    else:
+                        logger.error(f'Failed to find window with title: {self.root_handle}')
         logger.info(f'The root handle title is {self.root_handle_title} and num is {self.root_handle_num}')
 
         # 获取句柄树
@@ -303,6 +520,8 @@ class Handle:
                 return EmulatorFamily.FAMILY_MUMU
             elif name == 'NemuPlayer':
                 return EmulatorFamily.FAMILY_MUMU
+            elif name == 'MuMuNxDevice':  # 新增：识别MuMu的显示窗口结构
+                return EmulatorFamily.FAMILY_MUMU
             elif name == 'TheRender':
                 return EmulatorFamily.FAMILY_LD
             elif name == 'HD-Player':
@@ -311,6 +530,16 @@ class Handle:
             name = self.root_node.children[0].name
             if name == 'Nox':
                 return EmulatorFamily.FAMILY_NOX
+
+        # 特殊检测：通过子窗口结构识别MuMu模拟器
+        # 检查是否有 MuMuNxDevice -> nemudisplay 的结构
+        if children_num == 1:
+            first_child = self.root_node.children[0]
+            if first_child.name == 'MuMuNxDevice' and len(first_child.children) >= 1:
+                for grandchild in first_child.children:
+                    if grandchild.name == 'nemudisplay':
+                        logger.info('Detected MuMu emulator by window structure: MuMuNxDevice -> nemudisplay')
+                        return EmulatorFamily.FAMILY_MUMU
 
         # 基于句柄标题的判定
         for emu in Handle.emulator_list:
@@ -343,6 +572,18 @@ class Handle:
             elif name == 'NemuPlayer':
                 logger.info('The emulator is MuMu模拟器')
                 return num
+            elif name == 'MuMuNxDevice':
+                # 新的MuMu窗口结构：yys1 -> MuMuNxDevice -> nemudisplay
+                logger.info('The emulator is MuMu with display title structure')
+                # 查找nemudisplay子窗口
+                first_child = self.root_node.children[0]
+                for grandchild in first_child.children:
+                    if grandchild.name == 'nemudisplay':
+                        logger.info(f'Found nemudisplay window for screenshot: {grandchild.num}')
+                        return grandchild.num
+                # 如果没找到nemudisplay，返回MuMuNxDevice
+                logger.warning('nemudisplay not found, using MuMuNxDevice')
+                return num
         # 夜神
         elif self.emulator_family == EmulatorFamily.FAMILY_NOX:
             try:
@@ -367,13 +608,14 @@ class Handle:
         return self.root_node.num
 
     @cached_property
-    def screenshot_size(self) -> tuple or None:
+    def screenshot_size(self) -> tuple:
         """
         第一个是width 第二个是heigth
         2023.7.1 在高缩放的设备上应该输出1280X720
         :return:
         """
-        winRect = GetWindowRect(self.screenshot_handle_num)
+        handle_num = int(self.screenshot_handle_num)
+        winRect = GetWindowRect(handle_num)
         scale_rate = window_scale_rate()
         width_before: int = winRect[2] - winRect[0]  # 右x-左x
         height_before: int = winRect[3] - winRect[1]  # 下y - 上y 计算高度
@@ -384,7 +626,7 @@ class Handle:
             height = 720
         if width is None or height is None:
             logger.error(f'Get screenshot size error, width={width}, height={height}')
-            return None
+            return (1280, 720)  # 返回默认值而不是None
         return width, height
 
     @cached_property

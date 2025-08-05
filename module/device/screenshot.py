@@ -26,11 +26,16 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
     _minicap_uninstalled = False
     _screenshot_interval = Timer(0.1)
     _last_save_time = {}
+    _failed_method_count = {}  # 记录每种截图方法的失败次数
+    _fallback_methods = ['ADB', 'uiautomator2', 'ADB_nc']  # 备用方法优先级
+    _last_error_time = {}  # 记录上次错误时间，用于限制日志频率
     image: np.ndarray
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         super(Window, self).__init__(*args, **kwargs)
+        self._failed_method_count = {}
+        self._last_error_time = {}
 
     @cached_property
     def screenshot_methods(self):
@@ -55,28 +60,122 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
         self._screenshot_interval.wait()
         self._screenshot_interval.reset()
 
-        for _ in range(2):
+        current_method = self.config.script.device.screenshot_method
+        
+        # 检查当前方法是否失败次数过多，需要降级
+        if self._should_fallback_method(current_method):
+            current_method = self._get_fallback_method(current_method)
+            logger.warning(f'Screenshot method degraded to: {current_method}')
+            self.config.script.device.screenshot_method = current_method
+
+        for retry_count in range(2):
             method = self.screenshot_methods.get(
-                self.config.script.device.screenshot_method,
-                self.screenshot_adb  # 第二个参数默认的是screenshot_adb
+                current_method,
+                self.screenshot_adb  # 默认使用ADB
             )
-            self.image = method()
+            
+            try:
+                self.image = method()
+            except Exception as e:
+                error_msg = str(e)
+                self._record_method_failure(current_method)
+                
+                # 如果是窗口句柄错误，检查模拟器是否已关闭
+                if 'GetWindowDC' in error_msg or '无效的窗口句柄' in error_msg:
+                    # 限制错误日志频率，避免刷屏
+                    current_time = time.time()
+                    last_log_time = self._last_error_time.get('window_handle', 0)
+                    if current_time - last_log_time > 5:  # 5秒内只记录一次错误
+                        logger.error(f'Screenshot method {current_method} failed: {error_msg}')
+                        self._last_error_time['window_handle'] = current_time
+                    
+                    if not self._is_emulator_running():
+                        logger.warning('Emulator is no longer running, stopping screenshot attempts')
+                        from module.exception import EmulatorNotRunningError
+                        raise EmulatorNotRunningError('Emulator closed during screenshot')
+                else:
+                    logger.error(f'Screenshot method {current_method} failed: {error_msg}')
+                continue
 
-            # if self.config.Emulator_ScreenshotDedithering:
-            #     # This will take 40-60ms
-            #     cv2.fastNlMeansDenoising(self.image, self.image, h=17, templateWindowSize=1, searchWindowSize=2)
-            # self.image = self._handle_orientated_image(self.image)
+            # 启用自动方向处理
+            try:
+                self.image = self._handle_orientated_image(self.image)
+            except Exception as e:
+                logger.error(f'Failed to handle orientated image: {e}')
+                self._record_method_failure(current_method)
+                continue
 
-            # if self.config.Error_SaveError:
             if self.config.script.error.save_error:
                 self.screenshot_deque.append({'time': datetime.now(), 'image': self.image})
 
             if self.check_screen_size() and self.check_screen_black():
+                # 截图成功，重置失败计数
+                self._reset_method_failure(current_method)
                 break
             else:
+                # 截图质量不合格，记录失败
+                self._record_method_failure(current_method)
+                logger.warning(f'Screenshot quality check failed for method: {current_method}')
+                
+                # 连续失败多次时检查模拟器状态
+                if self._failed_method_count.get(current_method, 0) >= 5:
+                    if not self._is_emulator_running():
+                        logger.warning('Emulator appears to be closed, stopping screenshot attempts')
+                        from module.exception import EmulatorNotRunningError  
+                        raise EmulatorNotRunningError('Emulator closed during screenshot')
                 continue
 
         return self.image
+
+    def _record_method_failure(self, method):
+        """记录截图方法失败次数"""
+        if method not in self._failed_method_count:
+            self._failed_method_count[method] = 0
+        self._failed_method_count[method] += 1
+        logger.debug(f'Screenshot method {method} failure count: {self._failed_method_count[method]}')
+
+    def _reset_method_failure(self, method):
+        """重置截图方法失败次数"""
+        if method in self._failed_method_count:
+            self._failed_method_count[method] = 0
+
+    def _should_fallback_method(self, method):
+        """判断是否需要降级截图方法"""
+        # 窗口截图方法失败3次就降级，其他方法失败5次降级
+        threshold = 3 if 'window' in method.lower() else 5
+        return self._failed_method_count.get(method, 0) >= threshold
+    
+    def _is_emulator_running(self):
+        """检测模拟器是否还在运行"""
+        try:
+            # 快速检查ADB连接状态
+            devices = self.list_device()
+            for device in devices:
+                if device.serial == self.serial:
+                    return device.status == 'device'
+            return False
+        except Exception:
+            return False
+
+    def _get_fallback_method(self, current_method):
+        """获取备用截图方法"""
+        # 如果当前方法在备用列表中，返回下一个
+        if current_method in self._fallback_methods:
+            current_index = self._fallback_methods.index(current_method)
+            if current_index < len(self._fallback_methods) - 1:
+                return self._fallback_methods[current_index + 1]
+        
+        # 默认情况：窗口截图失败时降级到ADB，其他方法失败时降级到uiautomator2
+        if 'window' in current_method.lower():
+            logger.info('Window screenshot failed, falling back to ADB')
+            return 'ADB'
+        else:
+            # 非窗口方法失败，尝试下一个备用方法
+            for fallback in self._fallback_methods:
+                if fallback != current_method and self._failed_method_count.get(fallback, 0) < 3:
+                    return fallback
+            # 所有方法都失败了，返回最基础的ADB
+            return 'ADB'
 
     def _handle_orientated_image(self, image):
         """

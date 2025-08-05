@@ -91,8 +91,8 @@ SplitPanel{
                 setLoader(component)
                 const args = process_manager.gui_args(configName, title)
                 const value = process_manager.gui_task(configName, title)
-                setLoaderData(args, value)
-                setLoaderContext(configName, title)
+                setLoaderContext(configName, title)  // 先设置上下文
+                setLoaderData(args, value)           // 再设置数据，这会触发updataData()
             }else{
                 // 组件加载失败
             }
@@ -107,11 +107,12 @@ SplitPanel{
 
         //创建左边的菜单
         const data = JSON.parse(process_manager.gui_menu())
-        if(MainEvent.branch == 'master'){
-            if('Tools' in data){
-                delete data['Tools']
-            }
-        }
+        // 注释掉Tools菜单在master分支的禁用逻辑，启用Tools菜单
+        // if(MainEvent.branch == 'master'){
+        //     if('Tools' in data){
+        //         delete data['Tools']
+        //     }
+        // }
 
         create(data)
 
