@@ -552,8 +552,31 @@ Item {
             console.debug("没有数据")
         }
 
-        const args = JSON.parse(argsData)
-        const values = JSON.parse(valueData)
+        // 性能优化：延迟JSON解析和数据预处理
+        let args, values;
+        try {
+            args = JSON.parse(argsData)
+            values = JSON.parse(valueData)
+        } catch (e) {
+            console.error("JSON parsing error:", e)
+            return
+        }
+        
+        // 调试输出 (已注释)
+        // console.log("Processing task:", taskName)
+        // console.log("Args data:", JSON.stringify(args, null, 2))
+        
+        // 适配 Pydantic v2 格式：$defs 替代 definitions
+        let definitions = args.definitions || args.$defs || args["$defs"];
+        if(!definitions) {
+            console.error("Args data missing definitions/$defs field!")
+            return
+        }
+        
+        // 将 $defs 赋值给 args.definitions 以保持兼容性
+        args.definitions = definitions;
+        
+        // 性能优化：批量解析组信息
         const group = MP.parseGroup(args["properties"])
         const groups = MP.parseGroups(args["properties"])
 

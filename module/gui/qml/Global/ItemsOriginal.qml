@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import FluentUI
-import "../Global/"
 
 FluObject{
     id: itemsOriginal

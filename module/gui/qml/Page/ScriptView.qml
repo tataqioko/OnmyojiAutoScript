@@ -91,8 +91,8 @@ SplitPanel{
                 setLoader(component)
                 const args = process_manager.gui_args(configName, title)
                 const value = process_manager.gui_task(configName, title)
-                setLoaderData(args, value)
-                setLoaderContext(configName, title)
+                setLoaderContext(configName, title)  // 先设置上下文
+                setLoaderData(args, value)           // 再设置数据，这会触发updataData()
             }else{
                 // 组件加载失败
             }
