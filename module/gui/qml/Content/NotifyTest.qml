@@ -35,7 +35,7 @@ FluScrollablePage{
             FluMultilineTextBox{
                 id: notifyConfig
                 implicitWidth: yyyyy.conentWith
-                placeholderText: 'Please input your notify config'
+                placeholderText: qsTr('Please input your notify config')
                 text: 'provider: null'
 
             }
@@ -49,8 +49,8 @@ FluScrollablePage{
             FluTextBox{
                 id: notifyTitle
                 implicitWidth: yyyyy.conentWith
-                placeholderText: 'Title'
-                text: 'TEST TITLE'
+                placeholderText: qsTr('Title')
+                text: qsTr('TEST TITLE')
             }
             FluText{
                 text: '内容'
@@ -59,8 +59,8 @@ FluScrollablePage{
             FluMultilineTextBox{
                 id: notifyConent
                 implicitWidth: yyyyy.conentWith
-                placeholderText: 'Conent'
-                text: 'TEST conent'
+                placeholderText: qsTr('Content')
+                text: qsTr('TEST content')
             }
             FluFilledButton{
                 id: testSend
@@ -70,9 +70,9 @@ FluScrollablePage{
                     const result = utils.test_notify(notifyConfig.text, notifyTitle.text, notifyConent.text)
                     console.debug(result)
                     if(result === "true"){
-                        showSuccess('Successful')
+                        showSuccess(qsTr('Successful'))
                     }else{
-                        showError('Failure')
+                        showError(qsTr('Failure'))
                     }
                 }
             }

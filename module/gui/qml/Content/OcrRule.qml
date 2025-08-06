@@ -89,7 +89,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Editing rule"
+                    text: qsTr("Editing rule")
                     font: FluTextStyle.Subtitle
                 }
             }
@@ -100,7 +100,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Item name"
+                    text: qsTr("Item name")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -123,7 +123,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Roi front"
+                    text: qsTr("Roi front")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -145,7 +145,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Roi Back"
+                    text: qsTr("Roi Back")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -169,7 +169,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Mode"
+                    text: qsTr("Mode")
                     font: FluTextStyle.BodyStrong
                 }
                 FComboBox{
@@ -219,7 +219,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Method"
+                    text: qsTr("Method")
                     font: FluTextStyle.BodyStrong
                 }
                 FComboBox{
@@ -243,7 +243,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Keyword"
+                    text: qsTr("Keyword")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -271,7 +271,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Description"
+                    text: qsTr("Description")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -282,7 +282,7 @@ Item {
                     }
                     width: 200
                     text:(typeof ruleFile.currentItem === "undefined")? "" : ruleFile.currentItem.description
-                    placeholderText:"input your description"
+                    placeholderText:qsTr("input your description")
                     onEditingFinished: {
                         if(typeof ruleFile.currentItem === "undefined"){
                             return
@@ -326,7 +326,7 @@ Item {
         item["method"] = "Default"
         item["keyword"] = ""
         item["description"] = "Ocr-description"
-        showSuccess("Add new item")
+                    showSuccess(qsTr("Add new item"))
         return item
     }
 
@@ -350,7 +350,7 @@ Item {
         }
 
         ruleFile.rule_file.write_file(ruleFile.file, JSON.stringify(data, null, "  "))
-        showSuccess("Save file")
+                    showSuccess(qsTr("Save file"))
 
     }
 

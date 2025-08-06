@@ -7,7 +7,7 @@ import "../Global"
 
 FluContentDialog{
     id:dialog
-    title:"Add new config"
+    title: qsTr("Manage Configs")
 
     signal updateScriptItems
 
@@ -43,7 +43,7 @@ FluContentDialog{
             }
             spacing: 10
             FluText{
-                text: 'New name'
+                text: qsTr('New name')
                 leftPadding: 6
                 font: FluTextStyle.Caption
             }
@@ -54,7 +54,7 @@ FluContentDialog{
                 validator: RegularExpressionValidator { regularExpression: /^[a-zA-Z0-9]*$/ }
             }
             FluText{
-                text: 'Copy from existing config'
+                text: qsTr('Copy from existing config')
                 leftPadding: 6
                 font: FluTextStyle.Caption
             }
@@ -62,6 +62,40 @@ FluContentDialog{
                 id: copyConfig
                 width: newNameBox.width
                 model: ["Option 1", "Option 2", "Option 3"]
+            }
+            
+            // 分隔线
+            Rectangle {
+                width: newNameBox.width
+                height: 1
+                color: FluTheme.dark ? Qt.rgba(1,1,1,0.1) : Qt.rgba(0,0,0,0.1)
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            
+            FluText{
+                text: qsTr('Delete existing config')
+                leftPadding: 6
+                font: FluTextStyle.Caption
+            }
+            
+            Row {
+                spacing: 10
+                FComboBox{
+                    id: deleteConfig
+                    width: newNameBox.width - 80
+                    model: []
+                }
+                FluButton {
+                    text: qsTr('Delete')
+                    width: 70
+                    enabled: deleteConfig.currentIndex >= 0 && deleteConfig.model.length > 1
+                    onClicked: {
+                        if (deleteConfig.currentText) {
+                            deleteConfirmDialog.configName = deleteConfig.currentText
+                            deleteConfirmDialog.open()
+                        }
+                    }
+                }
             }
         }
         Rectangle{
@@ -127,13 +161,88 @@ FluContentDialog{
     }
     positiveText:"确定"
     onPositiveClicked:{
-        showSuccess("已创建")
-        add_config.copy(newNameBox.text, copyConfig.currentText)
-        dialog.updateScriptItems()
+        // 验证输入
+        if (!newNameBox.text || newNameBox.text.trim() === "") {
+            showError(qsTr("Please enter a valid config name"))
+            return
+        }
+        
+        if (!copyConfig.currentText) {
+            showError(qsTr("Please select a template to copy from"))
+            return
+        }
+        
+        // 检查配置名是否已存在
+        var existingConfigs = add_config.all_script_files()
+        if (existingConfigs.includes(newNameBox.text.trim())) {
+            showError(qsTr("Config '%1' already exists").arg(newNameBox.text.trim()))
+            return
+        }
+        
+        var success = add_config.copy(newNameBox.text.trim(), copyConfig.currentText)
+        if (success) {
+            showSuccess(qsTr("Config '%1' created successfully").arg(newNameBox.text.trim()))
+            
+            // 刷新配置列表
+            refreshConfigLists()
+            dialog.updateScriptItems()
+            
+            // 重置输入
+            newNameBox.text = add_config.generate_script_name()
+        } else {
+            showError(qsTr("Failed to create config '%1'").arg(newNameBox.text.trim()))
+        }
     }
 
+    // 提取刷新配置列表的函数
+    function refreshConfigLists() {
+        var allConfigs = add_config.all_json_file()
+        copyConfig.model = allConfigs
+        
+        // 为删除下拉框设置模型，排除template
+        var deleteableConfigs = allConfigs.filter(function(config) {
+            return config !== "template"
+        })
+        deleteConfig.model = deleteableConfigs
+        
+        // 如果只有一个可删除的配置，自动选择它
+        if (deleteableConfigs.length === 1) {
+            deleteConfig.currentIndex = 0
+        }
+    }
+    
     onOpened: {
         newNameBox.text = add_config.generate_script_name()
-        copyConfig.model = add_config.all_json_file()
+        refreshConfigLists()
+    }
+    
+    // 删除确认对话框
+    FluContentDialog {
+        id: deleteConfirmDialog
+        property string configName: ""
+        
+        title: qsTr("Confirm Delete")
+        message: qsTr("Are you sure you want to delete the config '%1'? This action cannot be undone.").arg(configName)
+        buttonFlags: FluContentDialog.NegativeButton | FluContentDialog.PositiveButton
+        negativeText: qsTr("Cancel")
+        positiveText: qsTr("Delete")
+        
+        onPositiveClicked: {
+            var success = add_config.delete_config(configName)
+            if (success) {
+                showSuccess(qsTr("Config '%1' deleted successfully").arg(configName))
+                
+                // 使用提取的函数刷新配置列表
+                refreshConfigLists()
+                
+                // 刷新导航菜单
+                dialog.updateScriptItems()
+                
+                // 自动关闭删除确认对话框
+                deleteConfirmDialog.close()
+            } else {
+                showError(qsTr("Failed to delete config '%1'").arg(configName))
+            }
+        }
     }
 }

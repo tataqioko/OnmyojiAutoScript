@@ -137,7 +137,7 @@ if __name__ == "__main__":
     # 但是貌似有问题的这个函数
     # check_admin()
     
-    print("🎮 阴阳师自动脚本启动中...")
+    print("阴阳师自动脚本启动中...")
     
     # 优先初始化GUI应用程序框架（最小依赖）
     app = FluentApp()
@@ -158,6 +158,6 @@ if __name__ == "__main__":
     # GUI初始化完成后再启动模拟器连接检查（完全异步，不阻塞）
     async_setup_emulator()
     
-    print("🎮 GUI界面启动完成!")
+    print("GUI界面启动完成!")
     # 启动GUI
     app.run()

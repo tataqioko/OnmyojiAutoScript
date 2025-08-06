@@ -20,7 +20,8 @@ Item {
 
             onItemClicked:(model)=>{
                     MainEvent.menuTitle = model.text
-                    splitPanel.title = model.text
+                    // 使用原始英文名传递给后端，显示文本仍然是翻译后的中文
+                    splitPanel.title = (model.data && model.data.originalName) || model.text
                     showSuccess(model.text)
                 }
         }
@@ -68,7 +69,8 @@ Item {
                     if (typeof data[items][item] !== "string") {
                       continue
                     }
-                    da.push(menu_tree.createItem(data[items][item], false))
+                    // 创建菜单项时保存原始英文名作为data
+                    da.push(menu_tree.createItem(qsTr(data[items][item]), false, [], {originalName: data[items][item]}))
                 }
                 datas.push(menu_tree.createItem(items, true, da))
             }

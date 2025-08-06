@@ -22,6 +22,8 @@ FluWindow {
        id:appbar
        z:9
        width: parent.width
+       
+
     }
 //    OverStatus{
 //        anchors{
@@ -71,6 +73,8 @@ FluWindow {
     Notity{
         id: notity
     }
+    
+
 
     FluNavigationView{
         id:nav_view
@@ -82,15 +86,20 @@ FluWindow {
         logo: "qrc:/res/icon.ico"
         title:"OAS"
         Component.onCompleted: {
+            console.log("NavigationView 开始初始化...")
             items.navigationView = nav_view
             footerItems.navigationView = nav_view
             nav_view.setCurrentIndex(0)
+            console.log("NavigationView 基本设置完成，准备加载配置项...")
             items.addFluPaneItems()
 
             // 注释掉启动通知弹窗
             // notity.open()
         }
+        
+
     }
+
     Component.onCompleted:{
 //        process_manager.create_all()
     }

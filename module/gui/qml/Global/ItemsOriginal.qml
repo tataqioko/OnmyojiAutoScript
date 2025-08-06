@@ -85,27 +85,73 @@ FluObject{
 
             if (object !== null) {
                 object.title = configName
-                // 创建成功，可以进行操作
                 children.push(object)
-//                children.insert(children.length -1, object)
-//                children.splice(children.length-1, object)
             } else {
-                // 创建失败
+                console.error("Failed to create config item:", configName)
             }
         } else {
-            // 组件加载失败
+            console.error("Failed to load component for:", configName, "Error:", component.errorString())
         }
     }
     //给添加
     function addFluPaneItems(){
+        try {
+            // 检查add_config是否可用
+            if (typeof add_config === 'undefined') {
+                console.error("add_config object is not available")
+                return
+            }
+            
+            var configs = add_config.all_script_files()
+            if (!configs || configs.length === 0) {
+                console.warn("No config files found")
+                return
+            }
+            
+            var exists = allPaneItems()
+            for(var i=0; i<configs.length; i++){
+                if(!exists.includes(configs[i])){
+                    createPaneItem(configs[i])
+                }
+            }
+        } catch(e) {
+            console.error("Error adding config items:", e.toString())
+        }
+    }
+    
+    // 刷新配置列表 - 删除不存在的配置项
+    function refreshConfigList(){
         var configs = add_config.all_script_files()
-        var exists = allPaneItems()
-        for(var i=0; i<configs.length; i++){
-            if(exists.includes(configs[i])){
-            }else{
-            createPaneItem(configs[i])
+        var items = navigationView.getItems()
+        
+        // 找到需要删除的项目
+        var itemsToRemove = []
+        for(var i = 0; i < items.length; i++){
+            var item = items[i]
+            if(item instanceof FluPaneItem && item.title !== "home"){
+                // 如果配置文件不存在，标记为删除
+                if(!configs.includes(item.title)){
+                    itemsToRemove.push(item)
+                }
             }
         }
+        
+        // 删除标记的项目
+        for(var j = 0; j < itemsToRemove.length; j++){
+            var itemToRemove = itemsToRemove[j]
+            // 从children中移除
+            for(var k = 0; k < children.length; k++){
+                if(children[k] === itemToRemove){
+                    children.splice(k, 1)
+                    break
+                }
+            }
+            // 销毁对象
+            itemToRemove.destroy()
+        }
+        
+        // 添加新的配置项（如果有的话）
+        addFluPaneItems()
     }
 
 }

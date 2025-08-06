@@ -50,26 +50,42 @@ class Add(QObject):
         return result
 
 
-    @Slot(str, str)
-    def copy(self, file: str, template: str = 'template') -> None:
+    @Slot(str, str, result="bool")
+    def copy(self, file: str, template: str = 'template') -> bool:
         """
         复制一个配置文件
         :param file:  不带json后缀
         :param template:
-        :return:
+        :return: 是否成功
         """
-        config_path = Path.cwd() / 'config'
-        template_path = config_path / f'{template}.json'
-        file_path = config_path / f'{file}.json'
-        if file_path.exists():
-            logger.error(f'{file_path} is exists')
-            return
+        try:
+            # 验证输入
+            if not file or not file.strip():
+                logger.error('File name cannot be empty')
+                return False
+                
+            file = file.strip()
+            config_path = Path.cwd() / 'config'
+            template_path = config_path / f'{template}.json'
+            file_path = config_path / f'{file}.json'
+            
+            if file_path.exists():
+                logger.error(f'{file_path} already exists')
+                return False
+            
+            if not template_path.exists():
+                logger.error(f'Template {template_path} does not exist')
+                return False
 
-        with open(template_path, 'r', encoding='utf-8') as f:
-            template_content = f.read()
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(template_content)
-        logger.info(f'copy {template_path} to {file_path}')
+            with open(template_path, 'r', encoding='utf-8') as f:
+                template_content = f.read()
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(template_content)
+            logger.info(f'Successfully copied {template_path} to {file_path}')
+            return True
+        except Exception as e:
+            logger.error(f'Error copying config {file}: {e}')
+            return False
 
 
     @Slot(result="QString")
@@ -94,6 +110,41 @@ class Add(QObject):
         script_numbers.sort()
         new_script_number = script_numbers[-1] + 1
         return f'oas{new_script_number}'
+
+    @Slot(str, result="bool")
+    def delete_config(self, config_name: str) -> bool:
+        """
+        删除配置文件
+        :param config_name: 配置文件名（不带.json后缀）
+        :return: 删除是否成功
+        """
+        try:
+            # 不允许删除template配置
+            if config_name == 'template':
+                logger.error(f'Cannot delete template config')
+                return False
+            
+            config_path = Path.cwd() / 'config'
+            file_path = config_path / f'{config_name}.json'
+            
+            if not file_path.exists():
+                logger.error(f'{file_path} does not exist')
+                return False
+            
+            # 检查是否是最后一个配置文件，如果是则不允许删除
+            all_configs = self.all_script_files()
+            if len(all_configs) <= 1:
+                logger.error('Cannot delete the last config file')
+                return False
+            
+            # 删除文件
+            file_path.unlink()
+            logger.info(f'Deleted config file: {file_path}')
+            return True
+            
+        except Exception as e:
+            logger.error(f'Error deleting config {config_name}: {e}')
+            return False
 
 if __name__ == "__main__":
     a = Add()

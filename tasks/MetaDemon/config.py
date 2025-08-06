@@ -11,8 +11,8 @@ from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
 
 
 class MetaDemonConfig(ConfigBase):
-    auto_tea: bool = Field(default=False, description='auto_tea_help')
-    extreme_notify: bool = Field(default=False, description='extreme_notify_help')
+    auto_tea: bool = Field(title='Auto Tea', default=False, description='auto_tea_help')
+    extreme_notify: bool = Field(title='Extreme Notify', default=False, description='extreme_notify_help')
 
 
 class MetaDemon(ConfigBase):

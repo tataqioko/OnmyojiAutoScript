@@ -8,9 +8,9 @@ from tasks.Component.config_base import ConfigBase
 
 class QuizConfig(ConfigBase):
     # 打多少轮
-    quiz_cnt: int = Field(default=1, description='quiz_cnt_help')
+    quiz_cnt: int = Field(title='Quiz Cnt', default=1, description='quiz_cnt_help')
     # 每轮多少道题
-    quiz_per_round: int = Field(default=150, description='quiz_per_round_help')
+    quiz_per_round: int = Field(title='Quiz Per Round', default=150, description='quiz_per_round_help')
 
 class Quiz(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)

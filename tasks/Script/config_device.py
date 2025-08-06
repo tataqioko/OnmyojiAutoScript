@@ -57,21 +57,21 @@ class Device(BaseModel):
     package_name: PackageName = Field(title='Package Name',
                                       default=PackageName.AUTO,
                                       description='package_name_help')
-    screenshot_method: ScreenshotMethod = Field(default=ScreenshotMethod.AUTO,
+    screenshot_method: ScreenshotMethod = Field(title='Screenshot Method', default=ScreenshotMethod.AUTO,
                                                 description='screenshot_method_help')
-    control_method: ControlMethod = Field(default=ControlMethod.MINITOUCH,
+    control_method: ControlMethod = Field(title='Control Method', default=ControlMethod.MINITOUCH,
                                           description='control_method_help')
     adb_restart: bool = Field(default=False,
                               description='adb_restart_help')
-    emulatorinfo_type: Union[EmulatorInfoType, str] = Field(default=EmulatorInfoType.AUTO,
+    emulatorinfo_type: Union[EmulatorInfoType, str] = Field(title='Emulatorinfo Type', default=EmulatorInfoType.AUTO,
                                                 description='emulatorinfo_type_help')
-    emulatorinfo_name: str = Field(default='',
+    emulatorinfo_name: str = Field(title='Emulatorinfo Name', default='',
                                    description='emulatorinfo_name_help')
-    emulatorinfo_path: str = Field(default='',
+    emulatorinfo_path: str = Field(title='Emulatorinfo Path', default='',
                                    description='emulatorinfo_path_help')
     # 举例, E:\ProgramFiles\MuMuPlayer-12.0\shell\MuMuPlayer.exe
     # 模拟器启动后最小化
-    emulator_window_minimize: bool = Field(default=False,
+    emulator_window_minimize: bool = Field(title='Emulator Window Minimize', default=False,
                                              description='emulator_window_minimize_help')
 
 

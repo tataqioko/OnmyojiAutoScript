@@ -14,13 +14,13 @@ class Transport(str, Enum):
 
 
 class TeamFlow(BaseModel):
-    enable: bool = Field(default=False, description='enable_help')
-    broker: str = Field(default='', description='broker_help')
-    port: int = Field(default=8883, description='port_help')
-    transport: Transport = Field(default=Transport.TCP, description='transport_help')
-    ca: str = Field(default='', description='ca_help')
-    username: str = Field(default='', description='username_help')
-    password: str = Field(default='', description='password_help')
+    enable: bool = Field(title='Enable', default=False, description='enable_help')
+    broker: str = Field(title='Broker', default='', description='broker_help')
+    port: int = Field(title='Port', default=8883, description='port_help')
+    transport: Transport = Field(title='Transport', default=Transport.TCP, description='transport_help')
+    ca: str = Field(title='Ca', default='', description='ca_help')
+    username: str = Field(title='Username', default='', description='username_help')
+    password: str = Field(title='Password', default='', description='password_help')
 
 
 class GlobalGame(BaseModel):

@@ -16,8 +16,8 @@ class Strategy(str, Enum):
     Dashen = 'frog_dashen'
 
 class FrogBossConfig(ConfigBase):
-    before_end_frog: Time = Field(default=Time(0, 15, 0), description='before_end_frog_help')
-    strategy_frog: Strategy = Field(default=Strategy.Majority, description='strategy_frog_help')
+    before_end_frog: Time = Field(title='Before End Frog', default=Time(0, 15, 0), description='before_end_frog_help')
+    strategy_frog: Strategy = Field(title='Strategy Frog', default=Strategy.Majority, description='strategy_frog_help')
 
 class FrogBoss(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)

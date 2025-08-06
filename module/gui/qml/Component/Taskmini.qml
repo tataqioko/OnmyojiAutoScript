@@ -22,7 +22,7 @@ Item {
             top: parent.top
             topMargin: 0
         }
-        text: "taskName"
+        text: qsTr("taskName")
         font: FluTextStyle.BodyStrong
     }
     FluText{
@@ -43,7 +43,7 @@ Item {
             rightMargin: 0
             verticalCenter: parent.verticalCenter
         }
-        text:"setting"
+        text:qsTr("setting")
         onClicked: {
             showSuccess(name)
             root.click(configName)

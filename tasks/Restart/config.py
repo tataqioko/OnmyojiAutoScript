@@ -27,8 +27,8 @@ class HarvestConfig(BaseModel):
 
 
 class TasksReset(BaseModel):
-    reset_task_datetime_enable: bool = Field(default=False, description='reset_task_datetime_enable_help')
-    reset_task_datetime: DateTime = Field(default="2023-01-01 00:00:00", description='rest_task_datetime_help')
+    reset_task_datetime_enable: bool = Field(default=False, title='Reset Task Datetime Enable', description='reset_task_datetime_enable_help')
+    reset_task_datetime: DateTime = Field(default="2023-01-01 00:00:00", title='Reset Task Datetime', description='rest_task_datetime_help')
 
 
 class LoginCharacterConfig(BaseModel):

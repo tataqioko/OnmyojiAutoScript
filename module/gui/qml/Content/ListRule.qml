@@ -91,7 +91,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Editing rule"
+                    text: qsTr("Editing rule")
                     font: FluTextStyle.Subtitle
                 }
             }
@@ -102,7 +102,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "List name"
+                    text: qsTr("List name")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -111,7 +111,7 @@ Item {
                         right: parent.right
                         verticalCenter: parent.verticalCenter
                     }
-                    placeholderText:"itemName"
+                    placeholderText:qsTr("itemName")
                     disabled: false
                     text: ruleFile.name
                     width: 200
@@ -127,7 +127,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Roi front"
+                    text: qsTr("Roi front")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -149,7 +149,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Roi Back"
+                    text: qsTr("Roi Back")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -173,7 +173,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Direction"
+                    text: qsTr("Direction")
                     font: FluTextStyle.BodyStrong
                 }
                 FComboBox{
@@ -207,7 +207,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Type"
+                    text: qsTr("Type")
                     font: FluTextStyle.BodyStrong
                 }
                 FComboBox{
@@ -241,7 +241,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Description"
+                    text: qsTr("Description")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -252,7 +252,7 @@ Item {
                     }
                     width: 200
                     text:ruleFile.description
-                    placeholderText:"input your description"
+                    placeholderText:qsTr("input your description")
                     onEditingFinished: {
                         ruleFile.description = text
                     }
@@ -288,12 +288,12 @@ Item {
                 topMargin: 10
             }
 
-            text:"Save image"
+            text:qsTr("Save image")
             onClicked: {
                 const i = ruleFile.file.lastIndexOf("/")
                 const imagepath = ruleFile.file.substring(0, i)
                 mirrorImage.save_target_image(ruleFile.currentItem.roiFront, imagepath +"/"+ruleFile.currentItem.itemName+'.png')
-                showSuccess("Save target image")
+                showSuccess(qsTr("Save target image"))
             }
         }
     }
@@ -302,7 +302,7 @@ Item {
         const item ={}
         item["itemName"] = "new"
         item["roiFront"] = "0,0,100,100"
-        showSuccess("Add new item")
+                    showSuccess(qsTr("Add new item"))
         return item
     }
 
@@ -328,7 +328,7 @@ Item {
         data["list"] = list
 
         ruleFile.rule_file.write_file(ruleFile.file, JSON.stringify(data, null, "  "))
-        showSuccess("Save file")
+                    showSuccess(qsTr("Save file"))
 
     }
 

@@ -196,7 +196,7 @@ Item {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Image Source"
+                text: qsTr("Image Source")
             }
             FComboBox{
                 id: imageSoucre
@@ -219,7 +219,7 @@ Item {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Local Image Name"
+                text: qsTr("Local Image Name")
             }
 
             FluFilledButton{
@@ -230,7 +230,7 @@ Item {
                     verticalCenter: parent.verticalCenter
                 }
                 width: 200
-                text:"select your image"
+                text:qsTr("select your image")
                 clip: true
 //                horizontalAlignment: Text.AlignRight
 //                elide: Text.ElideRight
@@ -241,7 +241,7 @@ Item {
 
             FileDialog{
                    id: imageFileDialog
-                   title: "select your image"
+                   title: qsTr("select your image")
                    nameFilters: ["Image Files (*.png *.jpg)"]
                    onAccepted: {
                        const selectedUrl = imageFileDialog.selectedFile.toString()
@@ -257,7 +257,7 @@ Item {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "ROI Model"
+                text: qsTr("ROI Model")
             }
             FComboBox{
                 id: roiModel
@@ -310,7 +310,7 @@ Item {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Frame Rate"
+                text: qsTr("Frame Rate")
             }
             FluSlider{
                 id: frameRate

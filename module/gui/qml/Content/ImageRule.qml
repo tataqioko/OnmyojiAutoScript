@@ -97,7 +97,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Editing rule"
+                    text: qsTr("Editing rule")
                     font: FluTextStyle.Subtitle
                 }
             }
@@ -108,7 +108,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Item name"
+                    text: qsTr("Item name")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -130,7 +130,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Image name"
+                    text: qsTr("Image name")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -141,7 +141,7 @@ Item {
                     }
                     disabled: true
                     text:(typeof ruleFile.currentItem === "undefined")? "" : ruleFile.currentItem.imageName
-                    placeholderText:"Save image name"
+                    placeholderText:qsTr("Save image name")
                     width: 200
                 }
             }
@@ -152,7 +152,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Roi front"
+                    text: qsTr("Roi front")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -174,7 +174,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Roi Back"
+                    text: qsTr("Roi Back")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -198,7 +198,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Find method"
+                    text: qsTr("Find method")
                     font: FluTextStyle.BodyStrong
                 }
                 FComboBox{
@@ -222,7 +222,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Threshod"
+                    text: qsTr("Threshold")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -249,7 +249,7 @@ Item {
                 FluText{
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Description"
+                    text: qsTr("Description")
                     font: FluTextStyle.BodyStrong
                 }
                 FluTextBox{
@@ -260,7 +260,7 @@ Item {
                     }
                     width: 200
                     text:(typeof ruleFile.currentItem === "undefined")? "" : ruleFile.currentItem.description
-                    placeholderText:"input your description"
+                    placeholderText:qsTr("input your description")
                     onEditingFinished: {
                         if(typeof ruleFile.currentItem === "undefined"){
                             return
@@ -299,12 +299,12 @@ Item {
                 topMargin: 10
             }
 
-            text:"Save image"
+            text:qsTr("Save image")
             onClicked: {
                 const i = ruleFile.file.lastIndexOf("/")
                 const imagepath = ruleFile.file.substring(0, i)
                 mirrorImage.save_target_image(ruleFile.currentItem.roiFront, imagepath +"/"+ruleFile.currentItem.imageName)
-                showSuccess("Save target image")
+                showSuccess(qsTr("Save target image"))
             }
         }
     }
@@ -318,7 +318,7 @@ Item {
         item["method"] = "Template matching"
         item["threshold"] = 0.8
         item["description"] = "description"
-        showSuccess("Add new item")
+                    showSuccess(qsTr("Add new item"))
         return item
     }
 
@@ -342,7 +342,7 @@ Item {
         }
 
         ruleFile.rule_file.write_file(ruleFile.file, JSON.stringify(data, null, "  "))
-        showSuccess("Save file")
+                    showSuccess(qsTr("Save file"))
 
     }
 

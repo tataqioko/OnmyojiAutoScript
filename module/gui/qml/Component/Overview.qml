@@ -261,12 +261,15 @@ Item {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
             }
             FluToggleButton{
+                id: autoScrollToggle
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 Layout.rightMargin: 16
                 text:"Auto Scroll On"
                 selected: true
+                property bool autoScrollEnabled: true
                 onClicked: {
                     selected = !selected
+                    autoScrollEnabled = selected
                     if(selected){
                         text = "Auto Scroll On"
                     }else{
@@ -285,6 +288,7 @@ Item {
         anchors.leftMargin: 10
         anchors.right: parent.right
         FluScrollablePage{
+            id: logScrollPage
             anchors.fill: parent
         FluText{
             id: textLog
@@ -316,6 +320,15 @@ Item {
                 currentLine += 1
                 textLog.text += log
 
+                // 自动滚动到底部（如果启用）
+                if(autoScrollToggle.autoScrollEnabled) {
+                    Qt.callLater(function() {
+                        var flickable = logScrollPage.children[1] // 获取FluScrollablePage内部的Flickable
+                        if(flickable && flickable.contentHeight > flickable.height) {
+                            flickable.contentY = flickable.contentHeight - flickable.height
+                        }
+                    })
+                }
             }
 
             Component.onCompleted:{

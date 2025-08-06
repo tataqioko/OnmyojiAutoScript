@@ -13,8 +13,8 @@ class Scheduler(ConfigBase):
     success_interval: TimeDelta = Field(default=TimeDelta(days=1), description='success_interval_help')
     failure_interval: TimeDelta = Field(default=TimeDelta(days=1), description='failure_interval_help')
     server_update: Time = Field(default=Time(hour=9, minute=0, second=0), description='server_update_help')
-    delay_date: int = Field(default=1, description='delay_date_help', ge=1, le=31)
-    float_time: Time = Field(default=Time(hour=0, minute=0, second=0), description='float_time_help')
+    delay_date: int = Field(default=1, title='Delay Date', description='delay_date_help', ge=1, le=31)
+    float_time: Time = Field(default=Time(hour=0, minute=0, second=0), title='Float Time', description='float_time_help')
 
 
 if __name__ == "__main__":

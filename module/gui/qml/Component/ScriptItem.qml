@@ -5,6 +5,11 @@ import "../Global/"
 FluPaneItem{
     title: "home"
     icon:FluentIcons.Play36
+    
+    // 添加自定义属性标识这是一个可删除的配置项
+    property bool isConfigItem: true
+    property string configName: title
+    
     onTap:{
 //        var component = Qt.createComponent("../../qml/Page/ScriptView.qml")
 //        if (component.status === Component.Ready) {

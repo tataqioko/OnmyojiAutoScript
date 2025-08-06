@@ -51,7 +51,7 @@ FluArea {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Select rule"
+                text: qsTr("Select rule")
                 font: FluTextStyle.BodyStrong
             }
         }
@@ -62,7 +62,7 @@ FluArea {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Folder"
+                text: qsTr("Folder")
                 font: FluTextStyle.BodyStrong
             }
             FluButton{
@@ -72,7 +72,7 @@ FluArea {
                     verticalCenter: parent.verticalCenter
                 }
                 disabled: true
-                text:"Select folder"
+                text:qsTr("Select folder")
                 width: 200
                 onClicked: {
 
@@ -86,7 +86,7 @@ FluArea {
             FluText{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: "File"
+                text: qsTr("File")
                 font: FluTextStyle.BodyStrong
             }
             FluButton{
@@ -95,7 +95,7 @@ FluArea {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
                 }
-                text:"Select file"
+                text:qsTr("Select file")
                 width: 200
                 onClicked: {
                     jsonFileDialog.open()
@@ -103,7 +103,7 @@ FluArea {
             }
             FileDialog{
                    id: jsonFileDialog
-                   title: "select your json file"
+                   title: qsTr("select your json file")
                    nameFilters: ["(*.json)"]
                    onAccepted: {
                        const selectedUrl = jsonFileDialog.selectedFile.toString()
@@ -136,7 +136,7 @@ FluArea {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
                 }
-                text:"New"
+                text:qsTr("New")
                 disabled: root.file === ""? true : false
                 width: parent.width
                 onClicked: {
@@ -154,7 +154,7 @@ FluArea {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
                 }
-                text:"Save file"
+                text:qsTr("Save file")
                 width: parent.width
                 disabled: root.file === ""? true : false
                 onClicked: {
@@ -187,7 +187,7 @@ FluArea {
                     anchors{
                         verticalCenter: parent.verticalCenter
                     }
-                    placeholderText:"item name"
+                    placeholderText:qsTr("item name")
                     text: model.itemName
 //                    validator: RegularExpressionValidator { regularExpression: /^[a-z0-9_]*$/ }
                     onActiveFocusChanged: {
