@@ -129,6 +129,9 @@ def initialize_gui_components():
     
     return add_config, setting, process_manager, utils, PaintImage, RuleFile
 
+from module.gui.utils import check_admin
+from module.gui.fluent_app import FluentApp
+
 if __name__ == "__main__":
     # 检查是不是以管理员身份运行，脚本启动的其他进程会继承权限
     # 但是貌似有问题的这个函数
@@ -137,7 +140,6 @@ if __name__ == "__main__":
     print("🎮 阴阳师自动脚本启动中...")
     
     # 优先初始化GUI应用程序框架（最小依赖）
-    from module.gui.fluent_app import FluentApp
     app = FluentApp()
     
     # 延迟初始化其他组件
