@@ -95,7 +95,7 @@
     "roiBack": "640,638,51,45",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "地狱鬼王"
+    "description": "地域鬼王"
   },
   {
     "itemName": "exploration_goto_heian_kitan",

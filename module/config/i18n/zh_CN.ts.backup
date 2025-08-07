@@ -268,15 +268,15 @@
     </message>
     <message>
         <source>HeroTest</source>
-        <translation>英雄试炼</translation>
+        <translation>英杰试炼</translation>
     </message>
     <message>
         <source>FindJade</source>
-        <translation>寻找达摩</translation>
+        <translation>寻找协作任务</translation>
     </message>
     <message>
         <source>MemoryScrolls</source>
-        <translation>追忆画卷</translation>
+        <translation>追忆绘卷</translation>
     </message>
     <message>
         <source>SixRealms</source>
@@ -284,7 +284,7 @@
     </message>
     <message>
         <source>AbyssShadows</source>
-        <translation>深渊之影</translation>
+        <translation>狭间暗域</translation>
     </message>
     <message>
         <source>GuildBanquet</source>
@@ -300,7 +300,7 @@
     </message>
     <message>
         <source>FrogBoss</source>
-        <translation>青蛙瓷器</translation>
+        <translation>对弈竞猜</translation>
     </message>
     <message>
         <source>FloatParade</source>
@@ -442,7 +442,7 @@
         <translation>滑动规范</translation>
     </message>
     <message><source>Daily Task</source><translation>日常任务</translation></message>
-    <message><source>AreaBoss</source><translation>地狱鬼王</translation></message>
+    <message><source>AreaBoss</source><translation>地域鬼王</translation></message>
     <message><source>GoldYoukai</source><translation>金币妖怪</translation></message>
     <message><source>ExperienceYoukai</source><translation>经验妖怪</translation></message>
     <message><source>Nian</source><translation>年兽</translation></message>
@@ -451,10 +451,10 @@
 	<message><source>OrochiMoans</source><translation>御魂悲鸣</translation></message>
     <message><source>OrochiJudgement</source><translation>御魂神罚</translation></message>
     <message><source>Sougenbi</source><translation>业原火</translation></message>
-    <message><source>FallenSun</source><translation>日轮之城</translation></message>
+    <message><source>FallenSun</source><translation>日轮之陨</translation></message>
     <message><source>EternitySea</source><translation>永生之海</translation></message>
 	<message><source>GlobalGame</source><translation>全局游戏设置</translation></message>
-	<message><source>RealmRaid</source><translation>个人突破</translation></message>
+	<message><source>RealmRaid</source><translation>突破</translation></message>
 	<message><source>RyouToppa</source><translation>寮突破</translation></message>
 	<message><source>Dokan</source><translation>道馆</translation></message>
 	<message><source>Exploration</source><translation>探索</translation></message>
@@ -501,7 +501,7 @@
     <name>TaskList</name>
     <message>
         <source>AbyssShadows</source>
-        <translation>深渊之影</translation>
+        <translation>狭间暗域</translation>
     </message>
     <message>
         <source>GuildBanquet</source>
@@ -517,7 +517,7 @@
     </message>
     <message>
         <source>FrogBoss</source>
-        <translation>青蛙瓷器</translation>
+        <translation>对弈竞猜</translation>
     </message>
     <message>
         <source>FloatParade</source>
@@ -649,7 +649,7 @@
     </message>
     <message>
         <source>FallenSun</source>
-        <translation>日轮之城</translation>
+        <translation>日轮之陨</translation>
     </message>
     <message>
         <source>EternitySea</source>
@@ -657,7 +657,7 @@
     </message>
     <message>
         <source>RealmRaid</source>
-        <translation>个人突破</translation>
+        <translation>突破</translation>
     </message>
     <message>
         <source>RyouToppa</source>
@@ -733,15 +733,15 @@
     </message>
     <message>
         <source>HeroTest</source>
-        <translation>英雄试炼</translation>
+        <translation>英杰试炼</translation>
     </message>
     <message>
         <source>FindJade</source>
-        <translation>寻找达摩</translation>
+        <translation>寻找协作任务</translation>
     </message>
     <message>
         <source>MemoryScrolls</source>
-        <translation>追忆画卷</translation>
+        <translation>追忆绘卷</translation>
     </message>
 </context>
 <context>
@@ -877,7 +877,7 @@ window_background >>> DroidCast_raw >  ADB_nc >> DroidCast > uiautomator2 ~= ADB
 <context>
     <name>Args</name>
 	<message><source>Boss Number</source><translation>挑战鬼王数量</translation></message>
-	<message><source>RaidConfig</source><translation>个人突破</translation></message>
+	<message><source>RaidConfig</source><translation>突破</translation></message>
 	<message><source>RaidMode</source><translation>挑战模式</translation></message>
 	<message><source>AttackNumber</source><translation>挑战次数</translation></message>
 	<message><source>raid_mode_help</source><translation>默认为退四打九，退四打九指每次执行前都会退出四次，然后在进攻九次</translation></message>
@@ -1495,23 +1495,23 @@ Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退�
     </message>
     <message>
         <source>Best Kiryou Select</source>
-        <translation>最佳鬼灵选择</translation>
+        <translation>极鬼灵歌姬选择</translation>
     </message>
     <message>
         <source>Best Shinkirou Select</source>
-        <translation>最佳心鬼选择</translation>
+        <translation>极蜃气楼选择</translation>
     </message>
     <message>
         <source>Best Tsuchigumo Select</source>
-        <translation>最佳土蜘蛛选择</translation>
+        <translation>极土蜘蛛选择</translation>
     </message>
     <message>
         <source>Best Gashadokuro Select</source>
-        <translation>最佳饿鬼选择</translation>
+        <translation>极荒骷髅选择</translation>
     </message>
     <message>
         <source>Best Namazu Select</source>
-        <translation>最佳鲶鱼选择</translation>
+        <translation>极地震鲶选择</translation>
     </message>
     <message>
         <source>accept</source>
@@ -1599,11 +1599,11 @@ Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退�
     </message>
     <message>
         <source>kitty_attempts</source>
-        <translation>小猫尝试次数</translation>
+        <translation>运行次数</translation>
     </message>
     <message>
         <source>kitty_quit_when_finished</source>
-        <translation>小猫完成后退出</translation>
+        <translation>达成目标后退出</translation>
     </message>
     <message>
         <source>quiz_cnt</source>
@@ -1615,11 +1615,11 @@ Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退�
     </message>
     <message>
         <source>auto_tea</source>
-        <translation>自动茶水</translation>
+        <translation>自动喝茶</translation>
     </message>
     <message>
         <source>extreme_notify</source>
-        <translation>极端通知</translation>
+        <translation>最高等级鬼王策略</translation>
     </message>
     <message>
         <source>hya_limit_time</source>

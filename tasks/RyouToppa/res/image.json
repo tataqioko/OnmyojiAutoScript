@@ -69,7 +69,7 @@
     "roiBack": "963,569,174,60",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "个人突破刷新按钮"
+    "description": "突破刷新按钮"
   },
   {
     "itemName": "ryou_reward_90",

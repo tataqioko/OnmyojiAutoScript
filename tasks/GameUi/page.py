@@ -78,7 +78,7 @@ page_exploration.link(button=G.I_EXPLORATION_GOTO_DELEGATION, destination=page_d
 page_secret_zones = Page(G.I_CHECK_SECRET_ZONES)
 page_secret_zones.link(button=G.I_BACK_BLUE, destination=page_exploration)
 page_exploration.link(button=G.I_EXPLORATION_GOTO_SECRET_ZONES, destination=page_secret_zones)
-# 地狱鬼王 area boss
+# 地域鬼王 area boss
 page_area_boss = Page(G.I_CHECK_AREA_BOSS)
 page_area_boss.link(button=G.I_BACK_BLUE, destination=page_exploration)
 page_exploration.link(button=G.I_EXPLORATION_GOTO_AREA_BOSS, destination=page_area_boss)

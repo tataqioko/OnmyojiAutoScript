@@ -304,7 +304,7 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
             cu, res, total = self.O_REALM_RAID_NUMBER1.ocr(self.device.image)
         else:
             cu, res, total = self.O_REALM_RAID_NUMBER.ocr(self.device.image)
-        # 判断突破票数量
+        # 判断突破券数量
         if cu < con_scrolls.scrolls_threshold:
             return
 

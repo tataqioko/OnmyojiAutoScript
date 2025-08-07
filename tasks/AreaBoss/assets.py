@@ -59,7 +59,7 @@ class AreaBossAssets:
 	# Image Rule Assets
 	# 探索图标 
 	I_EXPLORE = RuleImage(roi_front=(758,122,66,77), roi_back=(339,104,836,120), threshold=0.8, method="Template matching", file="./tasks/AreaBoss/res/res_explore.png")
-	# 地狱鬼王图标 
+	# 地域鬼王图标 
 	I_AREA_BOSS = RuleImage(roi_front=(639,636,65,68), roi_back=(606,619,145,100), threshold=0.8, method="Template matching", file="./tasks/AreaBoss/res/res_area_boss.png")
 	# 蓝色的返回 
 	I_BACK_BLUE = RuleImage(roi_front=(51,30,51,52), roi_back=(4,1,128,110), threshold=0.8, method="Template matching", file="./tasks/AreaBoss/res/res_back_blue.png")

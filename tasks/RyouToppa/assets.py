@@ -130,7 +130,7 @@ class RyouToppaAssets:
 	I_GUILD_ORDERS_REWARDS = RuleImage(roi_front=(1123,31,115,56), roi_back=(1123,31,115,56), threshold=0.8, method="Template matching", file="./tasks/RyouToppa/res/res_guild_orders_rewards.png")
 	# 攻破阴阳寮 
 	I_SUCCESS_PENETRATION = RuleImage(roi_front=(141,374,234,37), roi_back=(141,374,234,37), threshold=0.8, method="Template matching", file="./tasks/RyouToppa/res/res_success_penetration.png")
-	# 个人突破刷新按钮 
+	# 突破刷新按钮 
 	I_REAL_RAID_REFRESH = RuleImage(roi_front=(963,569,174,60), roi_back=(963,569,174,60), threshold=0.8, method="Template matching", file="./tasks/RyouToppa/res/res_real_raid_refresh.png")
 	# 击破后的寮奖励 
 	I_RYOU_REWARD_90 = RuleImage(roi_front=(134,415,232,38), roi_back=(134,415,232,38), threshold=0.8, method="Template matching", file="./tasks/RyouToppa/res/res_ryou_reward_90.png")
