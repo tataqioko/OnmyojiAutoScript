@@ -113,6 +113,13 @@ Item {
                         return
                     }
                 }
+                else if(arg.type === "button"){
+                    object = button_item.createObject(group_column)
+                    if(object === null){
+                        console.error("can not create component button_item", arg.title)
+                        return
+                    }
+                }
 
 
                 if(object === null){
@@ -387,6 +394,69 @@ Item {
                     return
                 }
                 itemArg_text.selected = modelData.value
+                itemArg_title.text = qsTranslate("Args", modelData.title)
+                if( typeof modelData.description === 'undefined'){
+                    return
+                }
+                itemArg_description.text = qsTranslate("Args", modelData.description)
+            }
+        }
+    }
+    Component{
+        id: button_item
+        Item{
+            id: itemArg
+            property var modelData: null
+            width: parent.width
+            implicitHeight: itemArg_title.implicitHeight + itemArg_description.implicitHeight
+            Layout.fillHeight: true
+            FluButton{
+                id: itemArg_button
+                anchors{
+                    top: parent.top
+                    topMargin: 2
+                    right: parent.right
+                    rightMargin: 300 - 120
+                }
+                width: 120
+                text: qsTr("刷新")
+                onClicked: {
+                    if(set_task(itemArg.parent.parent.parent.groupName, modelData.name, "refresh")){
+                        showSuccess( qsTr("重置任务时间成功"))
+                    }
+                }
+            }
+
+            FluText{
+                id: itemArg_title
+                anchors{
+                    top: parent.top
+                    left: parent.left
+                    right: itemArg_button.left
+                }
+                text: ""
+                font: FluTextStyle.BodyStrong
+                wrapMode: Text.WrapAnywhere
+                topPadding: 6
+            }
+            FluText{
+                id: itemArg_description
+                anchors{
+                    top: itemArg_title.bottom
+                    left: parent.left
+                }
+                width: itemArg_title.width
+                text: ""
+                font: FluTextStyle.Caption
+                wrapMode: Text.WrapAnywhere
+                topPadding: 6
+                rightPadding: 6
+            }
+            onModelDataChanged: {
+                if(modelData === null){
+                    console.error("button model is null")
+                    return
+                }
                 itemArg_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return

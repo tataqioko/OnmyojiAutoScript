@@ -15,8 +15,8 @@ def load_image(file: str):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     height, width, channels = img.shape
-                if height != 720 or width != 1280:
-                logger.error(f'Image size is {width}x{height}, not 1280x720')
+    if height != 720 or width != 1280:
+        logger.error(f'Image size is {width}x{height}, not 1280x720')
         return None
     return img
 

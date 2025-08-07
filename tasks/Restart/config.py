@@ -6,7 +6,7 @@ import string
 from pydantic import BaseModel, Field
 
 from tasks.Restart.config_scheduler import RestartScheduler
-from tasks.Component.config_base import ConfigBase, DateTime, MultiLine
+from tasks.Component.config_base import ConfigBase, DateTime, MultiLine, Button
 
 
 class HarvestConfig(BaseModel):
@@ -27,8 +27,9 @@ class HarvestConfig(BaseModel):
 
 
 class TasksReset(BaseModel):
-    reset_task_datetime_enable: bool = Field(default=False, title='Reset Task Datetime Enable', description='reset_task_datetime_enable_help')
-    reset_task_datetime: DateTime = Field(default="2023-01-01 00:00:00", title='Reset Task Datetime', description='rest_task_datetime_help')
+    # 新的按钮字段（替换原来的布尔字段）
+    reset_task_datetime_button: Button = Field(default="refresh", title='Reset Task Datetime', description='reset_task_datetime_button_help')
+    reset_task_datetime: DateTime = Field(default=DateTime.fromisoformat("2023-01-01 00:00:00"), title='Reset Task Datetime', description='reset_task_datetime_help')
 
 
 class LoginCharacterConfig(BaseModel):

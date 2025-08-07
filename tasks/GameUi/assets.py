@@ -41,7 +41,7 @@ class GameUiAssets:
 	# description 
 	I_EXPLORATION_GOTO_AWAKE_ZONE = RuleImage(roi_front=(57,628,57,61), roi_back=(33,619,113,79), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_exploration_goto_awake_zone.png")
 	# description 
-	I_EXPLORATION_GOTO_SOUL_ZONE = RuleImage(roi_front=(159,633,55,55), roi_back=(138,620,89,75), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_exploration_goto_soul_zone.png")
+	I_EXPLORATION_GOTO_SOUL_ZONE = RuleImage(roi_front=(159,633,55,55), roi_back=(138,620,89,75), threshold=0.6, method="Template matching", file="./tasks/GameUi/page/page_exploration_goto_soul_zone.png")
 	# description 
 	I_EXPLORATION_GOTO_REALM_RAID = RuleImage(roi_front=(248,636,67,48), roi_back=(229,612,102,87), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_exploration_goto_realm_raid.png")
 	# 前往御灵 
@@ -137,7 +137,7 @@ class GameUiAssets:
 	# 进入花合战 
 	I_MAIN_GOTO_DAILY = RuleImage(roi_front=(779,612,51,67), roi_back=(754,595,89,97), threshold=0.7, method="Template matching", file="./tasks/GameUi/page/page_main_goto_daily.png")
 	# description 
-	I_MAIN_GOTO_MALL = RuleImage(roi_front=(663,661,41,22), roi_back=(644,613,81,78), threshold=0.7, method="Template matching", file="./tasks/GameUi/page/page_main_goto_mall.png")
+	I_MAIN_GOTO_MALL = RuleImage(roi_front=(663,640,41,40), roi_back=(644,613,81,78), threshold=0.7, method="Template matching", file="./tasks/GameUi/page/page_main_goto_mall.png")
 	# description 
 	I_MAIN_GOTO_GUILD = RuleImage(roi_front=(540,611,50,54), roi_back=(540,611,50,54), threshold=0.7, method="Template matching", file="./tasks/GameUi/page/page_main_goto_guild.png")
 	# description 

@@ -393,10 +393,12 @@ class ConfigModel(ConfigBase):
             return False
 
         # XXX temp implementation to enable oasx control the datetime configuration globally rather than a single task
-        if task == "restart" and group == "task_config" and argument == "reset_task_datetime_enable" and value == True:
-            date_time = self.restart.task_config.reset_task_datetime
+        if task == "restart" and group == "tasks_config_reset" and argument == "reset_task_datetime_button":
+            date_time = self.restart.tasks_config_reset.reset_task_datetime
             logger.info(f"reset_task_datetime={date_time}")
             self.reset_datetime_for_all_enabled_tasks(date_time)
+            # 触发GUI刷新
+            self._trigger_gui_refresh()
 
         # 设置参数
         try:
@@ -413,29 +415,39 @@ class ConfigModel(ConfigBase):
             if isinstance(v, dict):
                 self.replace_next_run(v, dt=dt)
             elif k == "next_run":
+                # 直接设置为datetime对象，让Pydantic处理序列化
                 d[k] = dt
-                # convert value to datetime if it's a str
-                if isinstance(v, str):
-                    current_time = datetime.strptime(v, "%Y-%m-%d %H:%M:%S")
-                    if current_time != dt:
-                        d[k] = dt.strftime("%Y-%m-%d %H:%M:%S")
-                # already a datetime value
-                elif isinstance(v, datetime) and v != dt:
-                    d[k] = dt.strftime("%Y-%m-%d %H:%M:%S")
 
     def reset_datetime_for_all_enabled_tasks(self, task_datetime: datetime):
         logger.warn(f"trying to reset datetime of all tasks to: {task_datetime}")
-        # logger.info(f"current config: {self.dict()}")
-        data = self.dict()
-        self.replace_next_run(data, task_datetime)
-        # logger.info(f"new config: {data}")
+        
+        # 直接在模型对象上操作，而不是通过字典
+        self._update_all_next_run_fields(task_datetime)
+        
+        # 保存配置
+        self.save()
+    
+    def _update_all_next_run_fields(self, dt: datetime):
+        """递归更新所有任务的next_run字段为指定的datetime"""
+        updated_count = 0
+        for field_name, field_value in self.__dict__.items():
+            if hasattr(field_value, 'scheduler') and hasattr(field_value.scheduler, 'next_run'):
+                # 重置所有任务的时间，无论是否启用
+                old_time = field_value.scheduler.next_run
+                field_value.scheduler.next_run = dt
+                enable_status = getattr(field_value.scheduler, 'enable', '未知')
+                logger.info(f"重置任务时间: {field_name} [{old_time} -> {dt}] (启用: {enable_status})")
+                updated_count += 1
+        logger.info(f"总共重置了 {updated_count} 个任务的执行时间")
 
-        # write to json config  file
-        self.write_json(self.config_name, data)
-
-        # reload from the newly modified json config file
-        data = self.read_json(self.config_name)
-        super().__init__(**data)
+    def _trigger_gui_refresh(self):
+        """触发GUI刷新，通知界面重新加载任务数据"""
+        try:
+            # 发送一个特殊的日志消息，GUI可以监听这个消息来触发刷新
+            logger.info("GUI_REFRESH_REQUEST|TASK_LIST_UPDATED")
+            logger.info("任务时间重置完成，请刷新界面查看最新状态")
+        except Exception as e:
+            logger.debug(f"GUI刷新信号发送失败: {e}")
 
 
 if __name__ == "__main__":

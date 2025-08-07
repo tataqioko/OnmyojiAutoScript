@@ -36,7 +36,7 @@
       "float_time": "00:00:00"
     },
     "tasks_config_reset": {
-      "reset_task_datetime_enable": false,
+      "reset_task_datetime_button": "refresh",
       "reset_task_datetime": "2023-01-01 00:00:00"
     },
     "harvest_config": {

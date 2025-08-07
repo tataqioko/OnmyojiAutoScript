@@ -132,7 +132,7 @@ class GeneralBattleAssets:
 	# 绿标-下半部分 
 	I_GREEN_MARKER_BOTTOM = RuleImage(roi_front=(0,0,1280,720), roi_back=(0,0,1280,720), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_green_marker_bottom.png")
 	# 新版本的预设图案带数字 
-	I_PRESET_WIT_NUMBER = RuleImage(roi_front=(40,655,37,37), roi_back=(9,636,100,74), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_preset_wit_number.png")
+	I_PRESET_WIT_NUMBER = RuleImage(roi_front=(40,655,37,37), roi_back=(9,636,100,74), threshold=0.6, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_preset_wit_number.png")
 
 
 	# Image Rule Assets
@@ -144,7 +144,7 @@ class GeneralBattleAssets:
 	# 准备 
 	O_BATTLE_PREPARE = RuleOcr(roi=(1122,546,92,51), area=(1122,546,92,51), mode="Single", method="Default", keyword="准备", name="battle_prepare")
 	# 预设,部分场景预设按钮上的文字为'预设'+数字,导致点击preset失败 
-	O_PRESET = RuleOcr(roi=(20,620,60,80), area=(20,620,60,80), mode="Single", method="Default", keyword="预", name="preset")
+	O_PRESET = RuleOcr(roi=(20,620,60,80), area=(20,620,60,80), mode="Single", method="Default", keyword="预设", name="preset")
 
 
 	# Swipe Rule Assets

@@ -171,7 +171,7 @@ class Config(ConfigState, ConfigManual, ConfigWatcher, ConfigMenu):
         保存配置文件
         :return:
         """
-        self.model.write_json(self.config_name, self.model.dict())
+        self.model.write_json(self.config_name, self.model.model_dump())
 
     def update_scheduler(self) -> None:
         """
@@ -182,7 +182,7 @@ class Config(ConfigState, ConfigManual, ConfigWatcher, ConfigMenu):
         waiting_task = []
         error = []
         now = datetime.now()
-        for key, value in self.model.dict().items():
+        for key, value in self.model.model_dump().items():
             func = Function(key, value)
             if not func.enable:
                 continue

@@ -50,20 +50,39 @@ def time_validator(v: Any) -> time:
 MultiLine = Annotated[str,
                       WithJsonSchema({'type': 'multi_line'}),]
 
+Button = Annotated[str,
+                   WithJsonSchema({'type': 'button'}),]
+
 
 TimeDelta = Annotated[timedelta,
                       BeforeValidator(datadelta_validator),
                       PlainSerializer(format_timedelta, return_type=str),
                       WithJsonSchema({'type': 'time_delta'}),]
 
+def datetime_serializer(v):
+    if isinstance(v, str):
+        return v
+    elif hasattr(v, 'strftime'):
+        return v.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        return str(v)
+
 DateTime = Annotated[datetime,
                      BeforeValidator(datetime_validator),
-                     PlainSerializer(lambda v: v.strftime('%Y-%m-%d %H:%M:%S'), return_type=str),
+                     PlainSerializer(datetime_serializer, return_type=str),
                      WithJsonSchema({'type': 'date_time'}),]
+
+def time_serializer(v):
+    if isinstance(v, str):
+        return v
+    elif hasattr(v, 'strftime'):
+        return v.strftime('%H:%M:%S')
+    else:
+        return str(v)
 
 Time = Annotated[time,
                  BeforeValidator(time_validator),
-                 PlainSerializer(lambda v: v.strftime('%H:%M:%S'), return_type=str),
+                 PlainSerializer(time_serializer, return_type=str),
                  WithJsonSchema({'type': 'time'}),]
 
 # ---------------------------------------------------------------------------------------------------------------------
