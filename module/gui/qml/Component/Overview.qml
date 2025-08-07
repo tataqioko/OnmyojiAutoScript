@@ -18,6 +18,20 @@ Item {
             setStatus(MainEvent.RunStatus.Free)
         }
     }
+    
+    // 定期刷新调度器数据
+    Timer{
+        id: refreshTimer
+        interval: 5000  // 每5秒刷新一次
+        repeat: true
+        running: true
+        onTriggered: {
+            // 如果脚本没有运行，定期刷新静态数据
+            if(!process_manager.is_running(configName)) {
+                loadInitialSchedulerData()
+            }
+        }
+    }
 
 
     Item{
@@ -137,15 +151,16 @@ Item {
                 model: ListModel{
                     id: pendingListModel
                 }
-                delegate: Component{
-                    Taskmini{
-                        name: model.name
-                        nextRun: model.next_run
-                        onClick: {
-                            root.splitPanel.title = model.name
+                                    delegate: Component{
+                        Taskmini{
+                            name: model.name
+                            nextRun: model.next_run
+                            taskKey: model.originalName || model.name  // 使用原始任务名称
+                            onClick: {
+                                root.splitPanel.title = model.name
+                            }
                         }
                     }
-                }
             }
         }
         FluArea{
@@ -202,6 +217,7 @@ Item {
                         Taskmini{
                             name: model.name
                             nextRun: model.next_run
+                            taskKey: model.originalName || model.name  // 使用原始任务名称
                             onClick: {
                                 root.splitPanel.title = model.name
                             }
@@ -324,7 +340,41 @@ Item {
         process_manager.sig_update_task.connect(update_task)
         process_manager.sig_update_pending.connect(update_pending)
         process_manager.sig_update_waiting.connect(update_waiting)
+        
+        // 立即尝试加载初始数据，即使脚本未运行
+        loadInitialSchedulerData()
+        
         startInit.start()
+    }
+    
+    function loadInitialSchedulerData() {
+        try {
+            // 获取静态任务列表
+            const taskListResult = process_manager.gui_task_list(configName)
+            if(taskListResult) {
+                const data = JSON.parse(taskListResult)
+                const waitingTasks = []
+                
+                // 将所有任务作为等待任务显示
+                for(const taskName in data) {
+                    const taskInfo = data[taskName]
+                    if(taskInfo.enable) {  // 只显示启用的任务
+                        waitingTasks.push({
+                            name: taskName,
+                            originalName: taskName,
+                            next_run: taskInfo.next_run
+                        })
+                    }
+                }
+                
+                // 更新等待列表
+                update_waiting(configName, JSON.stringify(waitingTasks))
+                
+                console.log("Loaded initial scheduler data:", waitingTasks.length, "tasks")
+            }
+        } catch (error) {
+            console.warn("Failed to load initial scheduler data:", error)
+        }
     }
     function update_task(config, data){
         if(typeof data !== "string"){
@@ -352,7 +402,9 @@ Item {
         pendingListModel.clear()
         const d = JSON.parse(data)
         for(var item of d){
-            // 翻译任务名
+            // 保存原始任务名用于后端调用
+            item.originalName = item.name
+            // 翻译任务名用于显示
             item.name = qsTranslate("FluTreeView", item.name)
             pendingListModel.append(item)
         }
@@ -372,7 +424,9 @@ Item {
         waitingListModel.clear()
         const d = JSON.parse(data)
         for(var item of d){
-            // 翻译任务名
+            // 保存原始任务名用于后端调用
+            item.originalName = item.name
+            // 翻译任务名用于显示
             item.name = qsTranslate("FluTreeView", item.name)
             waitingListModel.append(item)
         }

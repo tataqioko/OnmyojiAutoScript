@@ -43,6 +43,7 @@
 ### 显著特点 
 - **全部任务**: 你能想到的没有想到的都有，一条龙给你解放双手（该画饼画饼，该挖坑挖坑）
 - **无缝衔接**: 时间管理大师，优异的任务调度系统，无缝寄养，无缝执行任务
+- **立即运行**: 每个任务都有"立即运行"按钮，无视调度时间直接运行，便于测试调试
 - **装饰可选**: 全部初始皮肤是什么鬼，这里支持你喜欢的庭院、主题等等，[详细说明](https://github.com/runhey/OnmyojiAutoScript/issues/180)
 - **百鬼夜行**: 利用AI来智能撒豆子，模型包含所有式神，[效果展示](https://runhey.github.io/OnmyojiAutoScript-website/docs/user-manual/hyakkiyakou)
 

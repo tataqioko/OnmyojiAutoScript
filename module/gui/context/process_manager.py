@@ -320,6 +320,169 @@ class ProcessManager(QObject):
             logger.info(f'Script {config} is not running')
             return False
 
+    @Slot(str, str, result="bool")
+    def gui_run_task_immediately(self, config: str, task: str) -> bool:
+        """
+        立即运行指定的任务，无视调度时间
+        用户手动选择的任务具有最高优先级
+        :param config: 配置名称
+        :param task: 任务名称
+        :return: 成功返回True，失败返回False
+        """
+        logger.info(f'User manually requested immediate run for task: {task}')
+        
+        return self._execute_immediate_run(config, task, user_priority=True)
+    
+    @Slot(str, str, bool, result="bool")
+    def gui_run_task_immediately_with_options(self, config: str, task: str, stop_current: bool = False) -> bool:
+        """
+        高级立即运行，带冲突处理选项
+        :param config: 配置名称
+        :param task: 任务名称
+        :param stop_current: 是否停止当前任务优先执行
+        :return: 成功返回True，失败返回False
+        """
+        logger.info(f'User requested immediate run for task: {task}, stop_current: {stop_current}')
+        
+        if stop_current and config in self.clients:
+            try:
+                # 先通知脚本中断当前任务
+                logger.info(f'Interrupting current task in {config} for priority task: {task}')
+                result = self.clients[config].gui_interrupt_current_task()
+                if result:
+                    # 中断成功，等待当前任务停止并立即运行新任务
+                    logger.info(f'Successfully sent interrupt signal, {task} will run immediately')
+                    # 短暂等待中断生效，然后设置立即运行
+                    from PySide6.QtCore import QTimer
+                    QTimer.singleShot(500, lambda: self._execute_immediate_run(config, task, user_priority=True))
+                    return True
+                else:
+                    # 中断失败，尝试停止整个脚本后重启
+                    logger.warning(f'Failed to interrupt task, stopping script {config}')
+                    self.stop_script(config)
+                    # 延迟重启并执行新任务
+                    from PySide6.QtCore import QTimer
+                    QTimer.singleShot(2000, lambda: self._restart_and_run(config, task))
+                    return True
+            except Exception as e:
+                logger.error(f'Failed to stop script for priority run: {e}')
+                # 降级处理：直接排队执行
+                return self._execute_immediate_run(config, task, user_priority=True)
+        
+        return self._execute_immediate_run(config, task, user_priority=True)
+    
+    def _execute_immediate_run(self, config: str, task: str, user_priority: bool = False) -> bool:
+        """
+        执行立即运行的核心逻辑
+        :param config: 配置名称
+        :param task: 任务名称
+        :param user_priority: 是否为用户优先级任务
+        :return: 成功返回True，失败返回False
+        """
+        priority_msg = " (USER PRIORITY)" if user_priority else ""
+        logger.info(f'Executing immediate run for {config}.{task}{priority_msg}')
+        
+        if config in self.clients:
+            try:
+                # 调用后端脚本的立即运行接口
+                result = self.clients[config].gui_run_task_immediately(task)
+                if result:
+                    logger.info(f'Task {task} successfully scheduled for immediate execution{priority_msg}')
+                    # 立即运行成功，触发GUI刷新
+                    self._trigger_gui_refresh(config)
+                return result
+            except Exception as e:
+                logger.error(f'Failed to run task immediately: {e}')
+                return False
+        else:
+            logger.info(f'Script {config} is not running, using ConfigModify for immediate run')
+            try:
+                # 如果脚本没有运行，使用ConfigModify来设置立即运行
+                config_modify = self.check_script(config)
+                result = config_modify.gui_run_task_immediately(task)
+                if result:
+                    logger.info(f'Task {task} configured for immediate execution when script starts{priority_msg}')
+                    # 立即运行成功，触发GUI刷新
+                    self._trigger_gui_refresh(config)
+                return result
+            except Exception as e:
+                logger.error(f'Failed to set immediate run via ConfigModify: {e}')
+                return False
+    
+    def _trigger_gui_refresh(self, config: str) -> None:
+        """
+        触发GUI刷新显示
+        :param config: 配置名称
+        """
+        try:
+            # 发送刷新信号，让GUI重新加载数据
+            from PySide6.QtCore import QTimer
+            QTimer.singleShot(500, lambda: self._delayed_refresh(config))  # 延迟500ms刷新
+        except Exception as e:
+            logger.debug(f'GUI refresh trigger not available: {e}')  # 降级为debug，不影响用户体验
+    
+    def _delayed_refresh(self, config: str) -> None:
+        """
+        延迟刷新GUI数据
+        :param config: 配置名称
+        """
+        try:
+            if config in self.clients:
+                # 如果脚本在运行，它会自动发送更新
+                pass
+            else:
+                # 如果脚本未运行，发送静态数据更新
+                config_modify = self.check_script(config)
+                task_list = config_modify.gui_task_list()
+                # 这里可以发送信号更新GUI，但需要解析任务状态
+                logger.info(f'Triggered delayed refresh for {config}')
+        except Exception as e:
+            logger.warning(f'Failed to perform delayed refresh: {e}')
+    
+    def _restart_and_run(self, config: str, task: str) -> None:
+        """
+        重启脚本并运行指定任务
+        :param config: 配置名称
+        :param task: 任务名称
+        """
+        try:
+            logger.info(f'Restarting script {config} to run priority task: {task}')
+            # 启动脚本
+            self.start_script(config)
+            # 等待脚本启动后设置立即运行
+            from PySide6.QtCore import QTimer
+            QTimer.singleShot(3000, lambda: self._execute_immediate_run(config, task, user_priority=True))
+        except Exception as e:
+            logger.error(f'Failed to restart and run: {e}')
+
+    @Slot(str, result="bool")
+    def is_running(self, config: str) -> bool:
+        """
+        检查指定配置的脚本是否正在运行
+        :param config: 配置名称
+        :return: 正在运行返回True，否则返回False
+        """
+        return config in self.processes and self.processes[config].is_alive()
+
+    @Slot(str, result="QString")
+    def get_current_task_status(self, config: str) -> str:
+        """
+        获取当前任务状态，用于冲突检查
+        :param config: 配置名称
+        :return: JSON格式的任务状态信息
+        """
+        try:
+            if config in self.clients:
+                # 如果脚本在运行，获取实时状态
+                schedule_data = self.clients[config].gui_get_schedule_data()
+                return schedule_data if schedule_data else "{}"
+            else:
+                # 如果脚本未运行，返回空状态
+                return "{}"
+        except Exception as e:
+            logger.error(f'Failed to get task status for {config}: {e}')
+            return "{}"
+
     @Slot(str, result="QImage")
     def gui_mirror_image(self, config: str) -> QImage:
         """

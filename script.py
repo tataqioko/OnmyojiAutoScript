@@ -202,6 +202,122 @@ class Script:
         ret, buffer = cv2.imencode('.jpg', img)
         yield buffer.tobytes()
 
+    def gui_run_task_immediately(self, task: str) -> bool:
+        """
+        立即运行指定的任务，无视调度时间
+        :param task: 任务名称（可以是显示名、大驼峰名或下划线格式）
+        :return: 成功返回True，失败返回False
+        """
+        try:
+            logger.info(f'GUI requesting immediate run of task: {task}')
+            
+            # 如果传入的是显示名（中文），需要反向查找到内部名称
+            internal_task_name = self._find_internal_task_name(task)
+            if internal_task_name:
+                task = internal_task_name
+                logger.info(f'Resolved display name to internal task: {internal_task_name}')
+            
+            # 调用config的task_call方法，设置immediate=True
+            result = self.config.task_call(task, force_call=True, immediate=True)
+            if result:
+                logger.info(f'Task {task} scheduled for immediate execution')
+            else:
+                logger.warning(f'Failed to schedule immediate execution for task {task}')
+            return result
+        except Exception as e:
+            logger.error(f'Error in gui_run_task_immediately for task {task}: {e}')
+            return False
+
+    def gui_get_schedule_data(self) -> str:
+        """
+        获取当前调度器状态数据，供GUI检查冲突使用
+        :return: JSON格式的调度器状态
+        """
+        try:
+            self.config.update_scheduler()
+            schedule_data = self.config.get_schedule_data()
+            return json.dumps(schedule_data, ensure_ascii=False, default=str)
+        except Exception as e:
+            logger.error(f'Error getting schedule data: {e}')
+            return "{}"
+
+    def gui_interrupt_current_task(self) -> bool:
+        """
+        真正强制中断当前正在执行的任务
+        :return: 成功返回True，失败返回False
+        """
+        try:
+            logger.info('GUI requesting FORCE INTERRUPT of current task for immediate run')
+            
+            # 设置强制中断标志
+            setattr(self.config, '_force_interrupt_flag', True)
+            setattr(self.config, '_interrupt_current_task', True)
+            
+            # 如果有正在执行的任务，强制终止
+            if hasattr(self.config, 'task') and self.config.task:
+                task_name = self.config.task.command if hasattr(self.config.task, "command") else "unknown"
+                logger.warning(f'FORCE INTERRUPTING current task: {task_name}')
+                
+                # 立即标记任务为完成状态
+                from datetime import datetime, timedelta
+                if hasattr(self.config.task, 'next_run'):
+                    self.config.task.next_run = datetime.now() - timedelta(seconds=1)
+            
+            # 设置异常来强制退出当前任务循环
+            setattr(self.config, '_force_exit_exception', RequestHumanTakeover("Task interrupted by user"))
+            
+            # 如果有设备，尝试中断当前操作
+            if hasattr(self, 'device') and self.device:
+                try:
+                    # 强制停止任何正在进行的UI操作
+                    logger.warning('Attempting to force stop current device operations')
+                    # 这里可以添加设备级别的强制停止
+                except Exception as e:
+                    logger.warning(f'Could not stop device operations: {e}')
+            
+            logger.warning('FORCE INTERRUPT signal sent - current task should stop immediately!')
+            return True
+                
+        except Exception as e:
+            logger.error(f'Error in force interrupt: {e}')
+            return False
+    
+    def _find_internal_task_name(self, display_task_name: str) -> str:
+        """
+        根据显示名称查找内部任务名称
+        :param display_task_name: 显示名称（中文或英文）
+        :return: 内部下划线格式的任务名称，找不到返回None
+        """
+        try:
+            # 先检查是否已经是正确的格式
+            if hasattr(self.config.model, display_task_name):
+                return display_task_name
+            
+            # 检查是否是大驼峰格式，尝试转换为下划线格式
+            underscore_name = convert_to_underscore(display_task_name)
+            if hasattr(self.config.model, underscore_name):
+                return underscore_name
+            
+            # 反向查找：遍历所有任务，比较显示名称
+            for attr_name in dir(self.config.model):
+                if not attr_name.startswith('_'):
+                    try:
+                        attr_obj = getattr(self.config.model, attr_name)
+                        if hasattr(attr_obj, 'scheduler'):
+                            # 获取这个任务的显示名称
+                            class_name = self.config.model.type(attr_name)
+                            if class_name == display_task_name:
+                                return attr_name
+                    except:
+                        continue
+            
+            logger.warning(f'Could not find internal task name for display name: {display_task_name}')
+            return None
+            
+        except Exception as e:
+            logger.error(f'Error in _find_internal_task_name for {display_task_name}: {e}')
+            return None
+
     def _gui_update_tasks(self) -> None:
         """
         获取更新任务后 pending waiting 的任务 和 当前的任务的数据。打包给gui显示
@@ -412,6 +528,12 @@ class Script:
         logger.info(f'Start scheduler loop: {self.config_name}')
 
         while 1:
+            # 检查强制中断标志 - 用户立即运行优先级最高
+            if hasattr(self.config, '_force_interrupt_flag') and self.config._force_interrupt_flag:
+                logger.warning('🚨 FORCE INTERRUPT DETECTED! Stopping current loop for user priority task')
+                self.config._force_interrupt_flag = False  # 重置标志
+                break
+            
             # Check update event from GUI
             # if self.stop_event is not None:
             #     if self.stop_event.is_set():
@@ -442,12 +564,39 @@ class Script:
                 del_cached_property(self, 'config')
                 continue
 
+            # 再次检查中断标志（任务运行前）
+            if hasattr(self.config, '_force_interrupt_flag') and self.config._force_interrupt_flag:
+                logger.warning('🚨 FORCE INTERRUPT before task execution! Task cancelled for user priority')
+                self.config._force_interrupt_flag = False
+                continue  # 跳过当前任务，回到主循环
+            
             # Run
             logger.info(f'Scheduler: Start task `{task}`')
             self.device.stuck_record_clear()
             self.device.click_record_clear()
             logger.hr(task, level=0)
-            success = self.run(inflection.camelize(task))
+            
+            try:
+                success = self.run(inflection.camelize(task))
+            except RequestHumanTakeover as e:
+                # 检查是否是强制中断异常
+                if "interrupted by user" in str(e).lower():
+                    logger.warning('🚨 Task interrupted by user force interrupt!')
+                    success = True  # 标记为成功，避免重试
+                    # 清理中断标志
+                    if hasattr(self.config, '_force_interrupt_flag'):
+                        self.config._force_interrupt_flag = False
+                else:
+                    raise e  # 重新抛出其他RequestHumanTakeover异常
+            except Exception as e:
+                # 检查是否是强制中断标志设置的其他异常
+                if hasattr(self.config, '_force_interrupt_flag') and self.config._force_interrupt_flag:
+                    logger.warning('🚨 Task interrupted by user force interrupt (via exception)!')
+                    self.config._force_interrupt_flag = False
+                    success = True  # 标记为成功，避免重试
+                else:
+                    raise e  # 重新抛出其他异常
+                    
             logger.info(f'Scheduler: End task `{task}`')
             self.is_first_task = False
 

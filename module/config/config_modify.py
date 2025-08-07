@@ -90,3 +90,64 @@ class ConfigModify(Config):
             key = self.model.type(key)
             result[key] = item
         return json.dumps(result)
+
+    def gui_run_task_immediately(self, task: str) -> bool:
+        """
+        立即运行指定的任务，无视调度时间
+        :param task: 任务名称（可以是显示名、大驼峰名或下划线格式）
+        :return: 成功返回True，失败返回False
+        """
+        try:
+            logger.info(f'ConfigModify requesting immediate run of task: {task}')
+            
+            # 如果传入的是显示名（中文），需要反向查找到内部名称
+            internal_task_name = self._find_internal_task_name(task)
+            if internal_task_name:
+                task = internal_task_name
+                logger.info(f'Resolved display name to internal task: {internal_task_name}')
+            
+            result = self.task_call(task, force_call=True, immediate=True)
+            if result:
+                logger.info(f'Task {task} scheduled for immediate execution via ConfigModify')
+            else:
+                logger.warning(f'Failed to schedule immediate execution for task {task} via ConfigModify')
+            return result
+        except Exception as e:
+            logger.error(f'Error in ConfigModify.gui_run_task_immediately for task {task}: {e}')
+            return False
+    
+    def _find_internal_task_name(self, display_task_name: str) -> str:
+        """
+        根据显示名称查找内部任务名称
+        :param display_task_name: 显示名称（中文或英文）
+        :return: 内部下划线格式的任务名称，找不到返回None
+        """
+        try:
+            # 先检查是否已经是正确的格式
+            if hasattr(self.model, display_task_name):
+                return display_task_name
+            
+            # 检查是否是大驼峰格式，尝试转换为下划线格式
+            underscore_name = convert_to_underscore(display_task_name)
+            if hasattr(self.model, underscore_name):
+                return underscore_name
+            
+            # 反向查找：遍历所有任务，比较显示名称
+            for attr_name in dir(self.model):
+                if not attr_name.startswith('_'):
+                    try:
+                        attr_obj = getattr(self.model, attr_name)
+                        if hasattr(attr_obj, 'scheduler'):
+                            # 获取这个任务的显示名称
+                            class_name = self.model.type(attr_name)
+                            if class_name == display_task_name:
+                                return attr_name
+                    except:
+                        continue
+            
+            logger.warning(f'Could not find internal task name for display name: {display_task_name}')
+            return None
+            
+        except Exception as e:
+            logger.error(f'Error in _find_internal_task_name for {display_task_name}: {e}')
+            return None

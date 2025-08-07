@@ -115,6 +115,13 @@ class Device(Platform, Screenshot, Control, AppControl):
         Returns:
             np.ndarray:
         """
+        # 🚨 在每次截图时检查强制中断标志 - 最细粒度的中断检查点
+        if hasattr(self.config, '_force_interrupt_flag') and self.config._force_interrupt_flag:
+            logger.warning('🚨 FORCE INTERRUPT detected in screenshot! Terminating task immediately!')
+            self.config._force_interrupt_flag = False
+            from module.exception import RequestHumanTakeover
+            raise RequestHumanTakeover("Task interrupted by user force interrupt")
+        
         self.stuck_record_check()
 
         try:
