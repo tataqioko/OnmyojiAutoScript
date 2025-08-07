@@ -104,8 +104,8 @@ class FindJade(ConfigBase):
     @model_validator(mode='before')
     @classmethod
     def validator_all(cls, v: dict) -> Any:
-        invite_info_count = v.get('find_jade_config', {}).get('invite_info_count', 1)
-        sup_account_count = v.get('find_jade_config', {}).get('sup_account_count', 1)
+        invite_info_count = int(v.get('find_jade_config', {}).get('invite_info_count', 1))
+        sup_account_count = int(v.get('find_jade_config', {}).get('sup_account_count', 1))
 
         def validator_list(list_name, data, item_type=None, list_size=1):
             if list_name not in data:
