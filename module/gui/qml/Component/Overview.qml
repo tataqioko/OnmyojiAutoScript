@@ -37,7 +37,7 @@ Item {
                 anchors.fill: parent
                 property int scriptState: 0  // 0是
                 FluText{
-                    text: 'Scheduler'
+                    text: "调度器"
                     Layout.leftMargin: 16
                     font: FluTextStyle.Subtitle
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
@@ -67,7 +67,7 @@ Item {
                 width: parent.width
                 spacing: 8
                 FluText{
-                    text: 'Running'
+                    text: "运行中"
                     Layout.leftMargin: 16
                     Layout.topMargin: 6
                     font: FluTextStyle.Subtitle
@@ -103,7 +103,7 @@ Item {
 
                 }
                 width: parent.width
-                text: 'Pending'
+                text: "等待执行"
                 leftPadding: 16
                 font: FluTextStyle.Subtitle
             }
@@ -167,7 +167,7 @@ Item {
 
                 }
                 width: parent.width
-                text: 'Waiting'
+                text: "等待中"
                 leftPadding: 16
                 font: FluTextStyle.Subtitle
             }
@@ -223,7 +223,7 @@ Item {
             anchors.fill: parent
             RowLayout.alignment: Qt.AlignRight | Qt.AlignVCenter
             FluText{
-                text: 'Log'
+                text: "日志"
                 Layout.leftMargin: 16
                 font: FluTextStyle.Subtitle
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
@@ -352,6 +352,8 @@ Item {
         pendingListModel.clear()
         const d = JSON.parse(data)
         for(var item of d){
+            // 翻译任务名
+            item.name = qsTranslate("FluTreeView", item.name)
             pendingListModel.append(item)
         }
     }
@@ -370,6 +372,8 @@ Item {
         waitingListModel.clear()
         const d = JSON.parse(data)
         for(var item of d){
+            // 翻译任务名
+            item.name = qsTranslate("FluTreeView", item.name)
             waitingListModel.append(item)
         }
     }

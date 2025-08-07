@@ -500,11 +500,6 @@
     <message><source>KittyShop</source><translation>猫猫店铺</translation></message>
     <message><source>DyeTrials</source><translation>染色试炼</translation></message>
     <message><source>SixRealms</source><translation>六道之门</translation></message>
-    
-    <!-- 可能缺失的任务名翻译 -->
-    <message><source>OrochiJudgement</source><translation>御魂神罚</translation></message>
-    <message><source>Nian</source><translation>年兽</translation></message>
-    <message><source>GotoMain</source><translation>回到主页</translation></message>
 </context>
 <context>
     <name>FileDialogs</name>

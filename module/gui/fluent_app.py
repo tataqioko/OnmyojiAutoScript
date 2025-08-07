@@ -84,6 +84,9 @@ class Translator(QObject):
         self.path_zh_CN = str((Path.cwd() / "module" / "config" / "i18n" / "zh_CN.qm").resolve())
 
         self.translator = QTranslator()
+        
+        # 自动设置为简体中文
+        self.set_language("简体中文")
 
     @Slot(str)
     def set_language(self, language: str) -> None:
@@ -93,17 +96,21 @@ class Translator(QObject):
         :return:
         """
         if language == "简体中文":
-            if not self.translator.load(self.path_zh_CN):
-                logger.error("load language 简体中文 failed!")
-            QGuiApplication.installTranslator(self.translator)
-            self._engine.retranslate()
+            if self.translator.load(self.path_zh_CN):
+                logger.info("✅ 简体中文翻译文件加载成功")
+                QGuiApplication.installTranslator(self.translator)
+                self._engine.retranslate()
+            else:
+                logger.error("❌ 简体中文翻译文件加载失败！")
             return
 
         if language == "English":
-            if not self.translator.load(self.path_en_US):
-                logger.error("load language English failed!")
-            QGuiApplication.installTranslator(self.translator)
-            self._engine.retranslate()
+            if self.translator.load(self.path_en_US):
+                logger.info("✅ English translation file loaded successfully")
+                QGuiApplication.installTranslator(self.translator)
+                self._engine.retranslate()
+            else:
+                logger.error("❌ English translation file loading failed!")
             return
 
 class DpiScale(QObject):
