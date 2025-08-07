@@ -111,12 +111,21 @@ Item{
 //                    showSuccess('Disenable')
 //                }
                 clickFunc: function click_func(){
-                    selected = !selected
-                    if(process_manager.gui_set_task_bool(MainEvent.scriptName, model.task, 'scheduler', 'enable', selected)){
-                        showSuccess("已启用")
-                        return true
+                    try {
+                        selected = !selected
+                        if(process_manager.gui_set_task_bool(MainEvent.scriptName, model.task, 'scheduler', 'enable', selected)){
+                            showSuccess(selected ? "已启用" : "已禁用")
+                            return true
+                        }
+                        showError("设置失败")
+                        selected = !selected // 回滚状态
+                        return false
+                    } catch (error) {
+                        console.error("Error toggling task enable:", error)
+                        selected = !selected // 回滚状态
+                        showError("操作失败: " + error)
+                        return false
                     }
-                    showSuccess('已禁用')
                 }
 
                 text: ''
@@ -131,9 +140,21 @@ Item{
                 }
                                  text:"设置"
                 onClicked: {
-                    showSuccess(name)
-                    taskList.click(name)
-                    taskList.parent.parent.title = model.task
+                    try {
+                        if(!model.task) {
+                            console.error("Task name is empty")
+                            showError("任务名称为空")
+                            return
+                        }
+                        showSuccess("打开设置: " + model.task)
+                        taskList.click(name)
+                        if(taskList.parent && taskList.parent.parent) {
+                            taskList.parent.parent.title = model.task
+                        }
+                    } catch (error) {
+                        console.error("Error opening task settings:", error)
+                        showError("打开设置失败: " + error)
+                    }
                 }
             }
         }
@@ -142,17 +163,32 @@ Item{
 
 
     Component.onCompleted:{
-
-        const data = JSON.parse(process_manager.gui_task_list(MainEvent.scriptName))
-        const menu = JSON.parse(process_manager.gui_menu())
-        for(const key in menu){
-            if(key === "Overview" || key === 'TaskList' || key === 'Script' || key === 'Tools'){
-                continue
+        try {
+            const taskListResult = process_manager.gui_task_list(MainEvent.scriptName)
+            if(!taskListResult) {
+                console.error("Failed to get task list: gui_task_list returned null")
+                return
             }
-            const groupData = classify(menu[key], data)
-            create_group(key, groupData)
+            
+            const menuResult = process_manager.gui_menu()
+            if(!menuResult) {
+                console.error("Failed to get menu: gui_menu returned null")
+                return
+            }
+            
+            const data = JSON.parse(taskListResult)
+            const menu = JSON.parse(menuResult)
+            
+            for(const key in menu){
+                if(key === "Overview" || key === 'TaskList' || key === 'Script' || key === 'Tools'){
+                    continue
+                }
+                const groupData = classify(menu[key], data)
+                create_group(key, groupData)
+            }
+        } catch (error) {
+            console.error("Error initializing TaskList:", error)
         }
-
     }
 
     // 分类对每一个任务组，
@@ -170,22 +206,34 @@ Item{
     }
     // 创建一个的任务组
     function create_group(groupName, groupData){
-        const object = group_item.createObject(contentScrollable)
-        if(object === null){
-            console.error('Create group item failed!')
+        try {
+            const object = group_item.createObject(contentScrollable)
+            if(object === null){
+                console.error('Create group item failed for group:', groupName)
+                return
+            }
+            
+            object.groupName = groupName
+            object.groupTitle = qsTranslate("FluTreeView", groupName)
+            object.argumentValue = groupData
+            
+            for(const key in groupData){
+                if(!groupData[key] || typeof groupData[key] !== 'object') {
+                    console.warn('Invalid task data for:', key)
+                    continue
+                }
+                
+                const item = {
+                    "task": key,
+                    "enable": groupData[key]["enable"] || false,
+                    "next_run": groupData[key]["next_run"] || "未设置"
+                }
+                object.model.append(item)
+            }
+
+            contentScrollable.content.push(object)
+        } catch (error) {
+            console.error('Error creating group', groupName, ':', error)
         }
-        object.groupName = groupName
-        object.groupTitle = qsTranslate("FluTreeView", groupName)
-        object.argumentValue = groupData
-        for(const key in groupData){
-            const item ={"task": key,
-                          "enable": groupData[key]["enable"],
-                         "next_run": groupData[key]["next_run"]}
-            object.model.append(item)
-
-        }
-
-        contentScrollable.content.push(object)
-
     }
 }

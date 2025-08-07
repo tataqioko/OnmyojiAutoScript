@@ -87,6 +87,6 @@ class ConfigModify(Config):
             scheduler = value["scheduler"]
             item = {"enable": scheduler["enable"],
                     "next_run": str(scheduler["next_run"])}
-            key = self.config.model.type(key)
+            key = self.model.type(key)
             result[key] = item
         return json.dumps(result)
