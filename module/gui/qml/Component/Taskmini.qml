@@ -43,7 +43,7 @@ Item {
             rightMargin: 0
             verticalCenter: parent.verticalCenter
         }
-        text:qsTr("setting")
+        text:"设置"
         onClicked: {
             showSuccess(name)
             root.click(configName)
@@ -57,7 +57,7 @@ Item {
         }
         root.visible = true
         const d = JSON.parse(data)
-        task_running.name = d["name"]
-        task_running.nextRun = d["next_run"]
+        root.name = qsTranslate("FluTreeView", d["name"])  // 使用正确的翻译上下文
+        root.nextRun = d["next_run"]
     }
 }

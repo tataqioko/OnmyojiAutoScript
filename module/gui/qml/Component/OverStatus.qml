@@ -18,7 +18,7 @@ Item{
         FluText{
             id: menuName
             Layout.alignment: Qt.AlignVCenter
-            text: qsTr(MainEvent.menuTitle)
+            text: qsTranslate("FluTreeView", MainEvent.menuTitle)
             font: FluTextStyle.BodyStrong
         }
         RunStatusIcon{

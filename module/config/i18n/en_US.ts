@@ -319,10 +319,7 @@
         <source>Waiting</source>
         <translation>Waiting</translation>
     </message>
-    <message>
-        <source>Auto Scroll On</source>
-        <translation>Auto Scroll On</translation>
-    </message>
+
     <message>
         <source>Enable</source>
         <translation>Enable</translation>

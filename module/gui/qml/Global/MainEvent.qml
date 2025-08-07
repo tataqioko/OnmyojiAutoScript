@@ -52,7 +52,8 @@ QtObject {
         mainEvent.displayMode = set["displayMode"]
         mainEvent.darkMode = set["darkMode"]
         mainEvent.nativeText = set["nativeText"]
-        mainEvent.language = set["language"]
+        // 确保语言设置在最后，这样翻译器会被正确初始化
+        mainEvent.language = set["language"] || "简体中文"
         mainEvent.dpiStrategy = set["dpiStrategy"]
         if ('branch' in set){
             mainEvent.branch = set['branch']

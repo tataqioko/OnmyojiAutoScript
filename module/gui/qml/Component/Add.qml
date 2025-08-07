@@ -7,7 +7,7 @@ import "../Global"
 
 FluContentDialog{
     id:dialog
-    title: qsTr("Manage Configs")
+    title: qsTranslate("Args", "Manage Configs")
 
     signal updateScriptItems
 
@@ -43,7 +43,7 @@ FluContentDialog{
             }
             spacing: 10
             FluText{
-                text: qsTr('New name')
+                text: qsTranslate("Args", 'New name')
                 leftPadding: 6
                 font: FluTextStyle.Caption
             }
@@ -54,7 +54,7 @@ FluContentDialog{
                 validator: RegularExpressionValidator { regularExpression: /^[a-zA-Z0-9]*$/ }
             }
             FluText{
-                text: qsTr('Copy from existing config')
+                text: qsTranslate("Args", 'Copy from existing config')
                 leftPadding: 6
                 font: FluTextStyle.Caption
             }
@@ -73,7 +73,7 @@ FluContentDialog{
             }
             
             FluText{
-                text: qsTr('Delete existing config')
+                text: qsTranslate("Args", 'Delete existing config')
                 leftPadding: 6
                 font: FluTextStyle.Caption
             }
@@ -86,7 +86,7 @@ FluContentDialog{
                     model: []
                 }
                 FluButton {
-                    text: qsTr('Delete')
+                    text: qsTranslate("Args", 'Delete')
                     width: 70
                     enabled: deleteConfig.currentIndex >= 0 && deleteConfig.model.length > 1
                     onClicked: {
@@ -163,25 +163,25 @@ FluContentDialog{
     onPositiveClicked:{
         // 验证输入
         if (!newNameBox.text || newNameBox.text.trim() === "") {
-            showError(qsTr("Please enter a valid config name"))
+                                    showError(qsTranslate("Args", "Please enter a valid config name"))
             return
         }
         
         if (!copyConfig.currentText) {
-            showError(qsTr("Please select a template to copy from"))
+            showError(qsTranslate("Args", "Please select a template to copy from"))
             return
         }
         
         // 检查配置名是否已存在
         var existingConfigs = add_config.all_script_files()
         if (existingConfigs.includes(newNameBox.text.trim())) {
-            showError(qsTr("Config '%1' already exists").arg(newNameBox.text.trim()))
+            showError(qsTranslate("Args", "Config '%1' already exists").arg(newNameBox.text.trim()))
             return
         }
         
         var success = add_config.copy(newNameBox.text.trim(), copyConfig.currentText)
         if (success) {
-            showSuccess(qsTr("Config '%1' created successfully").arg(newNameBox.text.trim()))
+            showSuccess(qsTranslate("Args", "Config '%1' created successfully").arg(newNameBox.text.trim()))
             
             // 刷新配置列表
             refreshConfigLists()
@@ -190,7 +190,7 @@ FluContentDialog{
             // 重置输入
             newNameBox.text = add_config.generate_script_name()
         } else {
-            showError(qsTr("Failed to create config '%1'").arg(newNameBox.text.trim()))
+            showError(qsTranslate("Args", "Failed to create config '%1'").arg(newNameBox.text.trim()))
         }
     }
 
@@ -221,16 +221,16 @@ FluContentDialog{
         id: deleteConfirmDialog
         property string configName: ""
         
-        title: qsTr("Confirm Delete")
-        message: qsTr("Are you sure you want to delete the config '%1'? This action cannot be undone.").arg(configName)
+        title: qsTranslate("Args", "Confirm Delete")
+        message: qsTranslate("Args", "Are you sure you want to delete the config '%1'? This action cannot be undone.").arg(configName)
         buttonFlags: FluContentDialog.NegativeButton | FluContentDialog.PositiveButton
-        negativeText: qsTr("Cancel")
-        positiveText: qsTr("Delete")
+        negativeText: qsTranslate("Args", "Cancel")
+        positiveText: qsTranslate("Args", "Delete")
         
         onPositiveClicked: {
             var success = add_config.delete_config(configName)
             if (success) {
-                showSuccess(qsTr("Config '%1' deleted successfully").arg(configName))
+                showSuccess(qsTranslate("Args", "Config '%1' deleted successfully").arg(configName))
                 
                 // 使用提取的函数刷新配置列表
                 refreshConfigLists()
@@ -241,7 +241,7 @@ FluContentDialog{
                 // 自动关闭删除确认对话框
                 deleteConfirmDialog.close()
             } else {
-                showError(qsTr("Failed to delete config '%1'").arg(configName))
+                showError(qsTranslate("Args", "Failed to delete config '%1'").arg(configName))
             }
         }
     }

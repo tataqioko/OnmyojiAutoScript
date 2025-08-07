@@ -27,7 +27,7 @@ Item {
             property string groupTitle: ""
             property var argumentValue: {""}
             expand: true
-            headerText: qsTr(groupTitle) +" "+ qsTr("Setting")
+            headerText: qsTranslate("Args", groupTitle) +" "+ qsTranslate("Args", "Setting")
             width: contentScrollable.width
             contentHeight: group_column.height + 20
             Column{
@@ -193,11 +193,11 @@ Item {
                     //判断是不是时间类型的变量2023-01-01
                     stringItem.isDateTime = true
                 }
-                string_title.text = qsTr(modelData.title)
+                string_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return
                 }
-                string_description.text = qsTr(modelData.description.replace("\\n","\n"))
+                string_description.text = qsTranslate("Args", modelData.description.replace("\\n","\n"))
             }
         }
     }
@@ -258,11 +258,11 @@ Item {
                 }
                 itemArg_text.text = modelData.value
                 itemArg_text.placeholderText = modelData["default"]
-                itemArg_title.text = qsTr(modelData.title)
+                itemArg_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return
                 }
-                itemArg_description.text = qsTr(modelData.description)
+                itemArg_description.text = qsTranslate("Args", modelData.description)
             }
         }
     }
@@ -323,11 +323,11 @@ Item {
                 }
                 itemArg_text.text = modelData.value
                 itemArg_text.placeholderText = modelData["default"]
-                itemArg_title.text = qsTr(modelData.title)
+                itemArg_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return
                 }
-                itemArg_description.text = qsTr(modelData.description)
+                itemArg_description.text = qsTranslate("Args", modelData.description)
             }
         }
     }
@@ -387,11 +387,11 @@ Item {
                     return
                 }
                 itemArg_text.selected = modelData.value
-                itemArg_title.text = qsTr(modelData.title)
+                itemArg_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return
                 }
-                itemArg_description.text = qsTr(modelData.description)
+                itemArg_description.text = qsTranslate("Args", modelData.description)
             }
         }
     }
@@ -413,8 +413,10 @@ Item {
                 }
                 model: ["0", "1", "2"]
                 onActivated: {
-                    if(set_task(itemArg.parent.parent.parent.groupName, modelData.name, currentText)){
-                        showSuccess( qsTr("Successful setting"))
+                    // 获取原始英文值
+                    var originalValue = modelData.options[currentIndex]
+                    if(set_task(itemArg.parent.parent.parent.groupName, modelData.name, originalValue)){
+                        showSuccess( qsTranslate("Args", "Successful setting"))
                     }
                 }
             }
@@ -450,13 +452,18 @@ Item {
                     console.error("enum model is null")
                     return
                 }
-                itemArg_text.model = modelData.options
-                itemArg_text.show(modelData.value)
-                itemArg_title.text = qsTr(modelData.title)
+                // 翻译下拉选项值
+                var translatedOptions = []
+                for(var i = 0; i < modelData.options.length; i++){
+                    translatedOptions.push(qsTranslate("Args", modelData.options[i]))
+                }
+                itemArg_text.model = translatedOptions
+                itemArg_text.show(qsTranslate("Args", modelData.value))
+                itemArg_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return
                 }
-                itemArg_description.text = qsTr(modelData.description)
+                itemArg_description.text = qsTranslate("Args", modelData.description)
             }
         }
     }
@@ -529,11 +536,11 @@ Item {
                 string_text.text = modelData.value
                 string_text.placeholderText = modelData["default"]
 
-                string_title.text = qsTr(modelData.title)
+                string_title.text = qsTranslate("Args", modelData.title)
                 if( typeof modelData.description === 'undefined'){
                     return
                 }
-                string_description.text = qsTr(modelData.description.replace("\\n","\n"))
+                string_description.text = qsTranslate("Args", modelData.description.replace("\\n","\n"))
             }
         }
     }

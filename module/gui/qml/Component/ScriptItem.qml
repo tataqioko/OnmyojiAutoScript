@@ -3,12 +3,17 @@ import FluentUI
 import "../Global/"
 
 FluPaneItem{
-    title: "home"
+    title: qsTranslate("FluTreeView", "home")
     icon:FluentIcons.Play36
     
     // 添加自定义属性标识这是一个可删除的配置项
     property bool isConfigItem: true
-    property string configName: title
+    property string configName: "home"  // 保存原始的英文名称用于后端通信
+    
+    // 当设置configName时，更新显示的title
+    onConfigNameChanged: {
+        title = qsTranslate("FluTreeView", configName)
+    }
     
     onTap:{
 //        var component = Qt.createComponent("../../qml/Page/ScriptView.qml")
@@ -27,7 +32,7 @@ FluPaneItem{
 //        }else{
 //            // 组件加载失败
 //        }
-    navigationView.pushScript(Qt.resolvedUrl("../../qml/Page/ScriptView.qml"), title)
-        MainEvent.scriptName = title
+    navigationView.pushScript(Qt.resolvedUrl("../../qml/Page/ScriptView.qml"), configName)
+        MainEvent.scriptName = configName
     }
 }

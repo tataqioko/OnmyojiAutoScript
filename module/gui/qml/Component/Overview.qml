@@ -54,35 +54,7 @@ Item {
                         textLog.currentLine = 0
                     }
                 }
-                FluToggleButton{
-                    id: startStart
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                    Layout.rightMargin: 16
-                    text: {if(overStatus.runStatus === MainEvent.RunStatus.Run){return "Stop"}
-                           else{return "Start"}}
-                    selected: {if(overStatus.runStatus === MainEvent.RunStatus.Free){return true}
-                                else{return false}}
-                    disabled: {if(overStatus.runStatus === MainEvent.RunStatus.Error ||
-                                  overStatus.runStatus === MainEvent.RunStatus.Empty){return true}
-                               else{return false}
-                    }
-                    onClicked: {
-                        console.debug(overStatus.runStatus)
-                        if(overStatus.runStatus === MainEvent.RunStatus.Free){
-                            //如果这个时候初始化好了但是还没有运行脚本
-                            setStatus(MainEvent.RunStatus.Run)
-                            process_manager.start_script(root.configName)
-                            return
-                        }
-                        if(overStatus.runStatus === MainEvent.RunStatus.Run){
-                            // 如果这个时候运行中
-                            setStatus(MainEvent.RunStatus.Empty)
-                            process_manager.stop_script(root.configName)
-                            return
-                        }
-                    }
 
-                }
             }
         }
         FluArea{
@@ -261,19 +233,30 @@ Item {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
             }
             FluToggleButton{
-                id: autoScrollToggle
+                id: startButton
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 Layout.rightMargin: 16
-                text:"Auto Scroll On"
-                selected: true
-                property bool autoScrollEnabled: true
+                text: {if(overStatus.runStatus === MainEvent.RunStatus.Run){return "Stop"}
+                       else{return "Start"}}
+                selected: {if(overStatus.runStatus === MainEvent.RunStatus.Free){return true}
+                            else{return false}}
+                disabled: {if(overStatus.runStatus === MainEvent.RunStatus.Error ||
+                              overStatus.runStatus === MainEvent.RunStatus.Empty){return true}
+                           else{return false}
+                }
                 onClicked: {
-                    selected = !selected
-                    autoScrollEnabled = selected
-                    if(selected){
-                        text = "Auto Scroll On"
-                    }else{
-                        text = "Auto Scroll Off"
+                    console.debug(overStatus.runStatus)
+                    if(overStatus.runStatus === MainEvent.RunStatus.Free){
+                        //如果这个时候初始化好了但是还没有运行脚本
+                        setStatus(MainEvent.RunStatus.Run)
+                        process_manager.start_script(root.configName)
+                        return
+                    }
+                    if(overStatus.runStatus === MainEvent.RunStatus.Run){
+                        // 如果这个时候运行中
+                        setStatus(MainEvent.RunStatus.Empty)
+                        process_manager.stop_script(root.configName)
+                        return
                     }
                 }
             }
@@ -320,15 +303,13 @@ Item {
                 currentLine += 1
                 textLog.text += log
 
-                // 自动滚动到底部（如果启用）
-                if(autoScrollToggle.autoScrollEnabled) {
-                    Qt.callLater(function() {
-                        var flickable = logScrollPage.children[1] // 获取FluScrollablePage内部的Flickable
-                        if(flickable && flickable.contentHeight > flickable.height) {
-                            flickable.contentY = flickable.contentHeight - flickable.height
-                        }
-                    })
-                }
+                // 自动滚动到底部（始终启用）
+                Qt.callLater(function() {
+                    var flickable = logScrollPage.children[1] // 获取FluScrollablePage内部的Flickable
+                    if(flickable && flickable.contentHeight > flickable.height) {
+                        flickable.contentY = flickable.contentHeight - flickable.height
+                    }
+                })
             }
 
             Component.onCompleted:{

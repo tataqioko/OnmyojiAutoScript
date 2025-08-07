@@ -30,7 +30,7 @@ Item{
             property var argumentValue: {""}
             property alias model: groupModel
             expand: true
-            headerText: qsTr(groupTitle)
+            headerText: qsTranslate("FluTreeView", groupName)
             width: contentScrollable.width
             contentHeight: groupGridView.height + 20
             ListModel{
@@ -81,7 +81,7 @@ Item{
                     top: parent.top
                     topMargin: 6
                 }
-                text: qsTr( model.task)
+                text: qsTranslate("FluTreeView", model.task)
                 font: FluTextStyle.BodyStrong
             }
             FluText{
@@ -113,10 +113,10 @@ Item{
                 clickFunc: function click_func(){
                     selected = !selected
                     if(process_manager.gui_set_task_bool(MainEvent.scriptName, model.task, 'scheduler', 'enable', selected)){
-                        showSuccess("Enable")
+                        showSuccess("已启用")
                         return true
                     }
-                    showSuccess('Disenable')
+                    showSuccess('已禁用')
                 }
 
                 text: ''
@@ -129,7 +129,7 @@ Item{
                     rightMargin: 10
                     verticalCenter: parent.verticalCenter
                 }
-                text:"setting"
+                                 text:"设置"
                 onClicked: {
                     showSuccess(name)
                     taskList.click(name)
@@ -175,7 +175,7 @@ Item{
             console.error('Create group item failed!')
         }
         object.groupName = groupName
-        object.groupTitle = qsTr(groupName)
+        object.groupTitle = qsTranslate("FluTreeView", groupName)
         object.argumentValue = groupData
         for(const key in groupData){
             const item ={"task": key,

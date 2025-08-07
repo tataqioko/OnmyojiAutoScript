@@ -127,6 +127,10 @@ SplitPanel{
         const component = Qt.createComponent("../../qml/Component/Overview.qml")
         if (component.status === Component.Ready) {
             setDefalut(component)
+            // 如果configName已经设置，立即应用
+            if(configName !== "") {
+                setDefalutConfig(configName)
+            }
 
         } else {
             // 组件加载失败

@@ -68,8 +68,8 @@ FluObject{
         var items = navigationView.getItems();
         for(var i=0;i<items.length;i++){
             var item = items[i]
-            if(item instanceof FluPaneItem){
-                arr.push(item.title)
+            if(item instanceof FluPaneItem && item.configName){
+                arr.push(item.configName)
             }
         }
         return arr
@@ -80,11 +80,11 @@ FluObject{
         var component = Qt.createComponent("../../qml/Component/ScriptItem.qml")
         if (component.status === Component.Ready) {
             var object = component.createObject(itemsOriginal, {
-                title: configName
+                configName: configName
             });
 
             if (object !== null) {
-                object.title = configName
+                object.configName = configName  // 设置原始英文名称
                 children.push(object)
             } else {
                 console.error("Failed to create config item:", configName)
@@ -128,9 +128,9 @@ FluObject{
         var itemsToRemove = []
         for(var i = 0; i < items.length; i++){
             var item = items[i]
-            if(item instanceof FluPaneItem && item.title !== "home"){
+            if(item instanceof FluPaneItem && item.configName && item.configName !== "home"){
                 // 如果配置文件不存在，标记为删除
-                if(!configs.includes(item.title)){
+                if(!configs.includes(item.configName)){
                     itemsToRemove.push(item)
                 }
             }
